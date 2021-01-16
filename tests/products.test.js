@@ -285,7 +285,28 @@ describe('Product API', async () => {
       response.status.should.equal(400);
     });
   });
-  afterEach(async () => {
-    await removeSeedData();
+  describe('DELETE /products/:productId', () => {
+    it('should delete a product from the library', async () => {
+      const response = await api.delete(`/api/products/${productData[2].id}`);
+      const products = await db
+        .query('SELECT * FROM products')
+        .then((response) => response.rows);
+      const remainingProducts = [productData[0], productData[1]];
+
+      response.status.should.equal(204);
+      products.length.should.equal(2);
+      products.should.deep.equal(remainingProducts);
+    });
+    it('should 404 if product isnt found to be deleted', async () => {
+      const response = await api.delete(`/api/products/testtesttesttesttestt`);
+      const products = await db
+        .query('SELECT * FROM products')
+        .then((response) => response.rows);
+      const remainingProducts = productData;
+
+      response.status.should.equal(404);
+      products.length.should.equal(3);
+      products.should.deep.equal(remainingProducts);
+    });
   });
 });

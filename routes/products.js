@@ -107,4 +107,12 @@ productRouter.put('/:productId', async (req, res) => {
   res.status(200).send();
 });
 
+productRouter.delete('/:productId', async (req, res) => {
+  await db.query('DELETE FROM products WHERE products.id = $1', [
+    req.product.id,
+  ]);
+
+  res.status(204).send();
+});
+
 export default productRouter;
