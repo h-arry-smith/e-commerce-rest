@@ -6,6 +6,8 @@ import { nanoid } from 'nanoid';
 import createServer from '../app.js';
 import db from '../db/db.js';
 
+import { seedData, removeSeedData } from './helpers/product.js';
+
 const app = createServer();
 
 const api = await request(app);
@@ -33,20 +35,6 @@ const productData = [
     category: 2,
   },
 ];
-
-const seedData = async (product) => {
-  await db.query('INSERT INTO products VALUES ($1, $2, $3, $4, $5);', [
-    product.id,
-    product.name,
-    product.description,
-    product.price,
-    product.category,
-  ]);
-};
-
-const removeSeedData = async () => {
-  await db.query('DELETE FROM products');
-};
 
 describe('Product API', async () => {
   beforeEach(async () => {
