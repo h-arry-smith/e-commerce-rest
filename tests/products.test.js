@@ -136,6 +136,88 @@ describe('Product API', async () => {
       response.body.length.should.equal(0);
     });
   });
+  describe('POST /products', () => {
+    it('creates a new product in the database', async () => {
+      const response = await api.post('/api/products').send(productData[0]);
+      const product = response.body;
+
+      response.status.should.equal(201);
+
+      product.name.should.equal(productData[0].name);
+      product.description.should.equal(productData[0].description);
+      product.price.should.equal(productData[0].price);
+      product.category.should.equal(productData[0].category);
+    });
+    it('name must not be empty', async () => {
+      const badProduct = {
+        name: '',
+        description: '',
+        price: 100,
+        category: 1,
+      };
+
+      const response = await api.post('/api/products').send(badProduct);
+      const products = await db
+        .query('SELECT * FROM products WHERE products.name = $1', [
+          productData[0].name,
+        ])
+        .then((response) => response.rows);
+
+      response.status.should.equal(400);
+      products.length.should.equal(0);
+    });
+    it('price must not be negative', async () => {
+      const badProduct = {
+        name: 'test',
+        description: '',
+        price: -100,
+        category: 1,
+      };
+
+      const response = await api.post('/api/products').send(badProduct);
+      const products = await db
+        .query('SELECT * FROM products WHERE products.name = $1', [
+          productData[0].name,
+        ])
+        .then((response) => response.rows);
+
+      response.status.should.equal(400);
+      products.length.should.equal(0);
+    });
+    it('description is an optional paramater', async () => {
+      const noDescription = {
+        name: 'test',
+        price: 100,
+        category: 1,
+      };
+
+      const response = await api.post('/api/products').send(noDescription);
+      const products = await db
+        .query('SELECT * FROM products WHERE products.name = $1', [
+          productData[0].name,
+        ])
+        .then((response) => response.rows);
+
+      response.status.should.equal(201);
+      products.length.should.equal(0);
+    });
+    it('doesnt create product if essential parameters are missing', async () => {
+      const badProduct = {
+        description: '',
+        category: 1,
+      };
+
+      const response = await api.post('/api/products').send(badProduct);
+      const products = await db
+        .query('SELECT * FROM products WHERE products.name = $1', [
+          productData[0].name,
+        ])
+        .then((response) => response.rows);
+
+      response.status.should.equal(400);
+      products.length.should.equal(0);
+    });
+  });
   afterEach(async () => {
     await removeSeedData();
   });
