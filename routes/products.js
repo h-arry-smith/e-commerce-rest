@@ -83,4 +83,14 @@ productRouter.post('/', validateProduct, async (req, res) => {
   res.status(201).send(newProduct);
 });
 
+productRouter.put('/:productId', async (req, res) => {
+  const update = req.body;
+  await db.query(
+    'UPDATE products SET name=$1, description=$2, price=$3, category=$4 WHERE products.id = $5',
+    [update.name, update.description, update.price, update.category, update.id]
+  );
+
+  res.status(200).send();
+});
+
 export default productRouter;

@@ -218,6 +218,43 @@ describe('Product API', async () => {
       products.length.should.equal(0);
     });
   });
+  describe('UPDATE /products/:productId', () => {
+    beforeEach(async () => {
+      await seedData(productData[0]);
+      await seedData(productData[1]);
+      await seedData(productData[2]);
+    });
+    it('updates a product in the database', async () => {
+      const updatedProduct = { ...productData[0], name: 'test-the-update' };
+
+      const response = await api
+        .put(`/api/products/${productData[0].id}`)
+        .send(updatedProduct);
+
+      const product = await db
+        .query('SELECT * FROM products WHERE products.id = $1', [
+          productData[0].id,
+        ])
+        .then((response) => response.rows);
+
+      response.status.should.equal(200);
+      product.length.should.equal(1);
+      product[0].should.deep.equal(updatedProduct);
+    });
+    it('returns a 404 if the product id does not exist', async () => {
+      const updatedProduct = {
+        ...productData[0],
+        name: 'test-the-update',
+        id: 'testtesttesttesttestt',
+      };
+
+      const response = await api
+        .put(`/api/products/${updatedProduct.id}`)
+        .send(updatedProduct);
+
+      response.status.should.equal(404);
+    });
+  });
   afterEach(async () => {
     await removeSeedData();
   });
