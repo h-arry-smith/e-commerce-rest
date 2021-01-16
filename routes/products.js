@@ -4,8 +4,14 @@ import db from '../db/db.js';
 const productRouter = Router();
 
 productRouter.get('/', async (req, res) => {
+  let filter = '';
+
+  if (req.query.category) {
+    filter = ` WHERE category = ${req.query.category}`;
+  }
+
   const products = await db
-    .query('SELECT * FROM products')
+    .query('SELECT * FROM products' + filter)
     .then((response) => response.rows);
 
   res.status(200).send(products);

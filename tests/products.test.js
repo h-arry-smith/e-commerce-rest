@@ -23,14 +23,14 @@ const productData = [
     name: 'test2',
     description: 'test description',
     price: '$100.00',
-    category: 1,
+    category: 2,
   },
   {
     id: nanoid(),
     name: 'test3',
     description: 'test description',
     price: '$100.00',
-    category: 1,
+    category: 2,
   },
 ];
 
@@ -106,6 +106,34 @@ describe('Product API', async () => {
         .then((response) => response);
 
       response.status.should.equal(404);
+    });
+  });
+  describe('GET /products/?category=', () => {
+    it('returns a list of products in the selected category', async () => {
+      await seedData(productData[0]);
+      await seedData(productData[1]);
+      await seedData(productData[2]);
+
+      const response = await api
+        .get('/api/products/?category=2')
+        .then((response) => response);
+
+      response.status.should.equal(200);
+      response.body.should.be.a.instanceOf(Array);
+      response.body.should.deep.equal([productData[1], productData[2]]);
+    });
+    it('returns a empty list if the category does not return any results', async () => {
+      await seedData(productData[0]);
+      await seedData(productData[1]);
+      await seedData(productData[2]);
+
+      const response = await api
+        .get('/api/products/?category=5')
+        .then((response) => response);
+
+      response.status.should.equal(200);
+      response.body.should.be.a.instanceOf(Array);
+      response.body.length.should.equal(0);
     });
   });
   afterEach(async () => {
