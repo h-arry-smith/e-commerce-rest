@@ -1,6 +1,7 @@
 import express from 'express';
 import morgan from 'morgan';
 
+import productRouter from './routes/products.js';
 
 const createServer = () => {
   const app = express();
@@ -10,6 +11,7 @@ const createServer = () => {
     app.use(morgan('tiny'));
   }
 
+  api.use('/products', productRouter);
 
   app.use(express.json());
   app.use('/api', api);
