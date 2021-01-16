@@ -218,7 +218,7 @@ describe('Product API', async () => {
       products.length.should.equal(0);
     });
   });
-  describe('UPDATE /products/:productId', () => {
+  describe('PUT /products/:productId', () => {
     beforeEach(async () => {
       await seedData(productData[0]);
       await seedData(productData[1]);
