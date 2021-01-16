@@ -1,15 +1,19 @@
 import express from 'express';
 import morgan from 'morgan';
 
-const app = express();
-const port = 3000;
 
-app.use(morgan('tiny'));
+const createServer = () => {
+  const app = express();
+  const api = express.Router();
 
-app.get('/', (req, res) => {
-  res.send('Hello World!');
-});
+  if (process.env.LOGGING === 'true') {
+    app.use(morgan('tiny'));
+  }
 
-app.listen(port, () => {
-  console.log(`server listening at http://localhost:${port}`);
-});
+
+  app.use(express.json());
+  app.use('/api', api);
+  return app;
+};
+
+export default createServer;

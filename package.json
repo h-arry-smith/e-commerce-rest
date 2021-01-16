@@ -5,7 +5,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "PGUSER=test PGPASSWORD=null PGDATABASE=ecommerce PGHOST=localhost PGPORT=5432 LOGGING=true nodemon index.js",
+    "test": "PGUSER=test PGPASSWORD=null PGDATABASE=ecommerce_test PGHOST=localhost PGPORT=5432 mocha tests/*"
   },
   "author": "",
   "license": "ISC",
