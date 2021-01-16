@@ -49,8 +49,19 @@ const removeSeedData = () => {
 };
 
 describe('Product API', async () => {
+  beforeEach(async () => {
+    await seedData(productData[0]);
+    await seedData(productData[1]);
+    await seedData(productData[2]);
+  });
+  afterEach(() => {
+    removeSeedData();
+  });
+
   describe('GET /products', () => {
     it('GET /products returns an empty list when no products in the db', async () => {
+      await removeSeedData();
+
       const response = await api
         .get('/api/products')
         .then((response) => response);
@@ -60,10 +71,6 @@ describe('Product API', async () => {
       response.body.length.should.equal(0);
     });
     it('GET /products returns a list of all products', async () => {
-      await seedData(productData[0]);
-      await seedData(productData[1]);
-      await seedData(productData[2]);
-
       const response = await api
         .get('/api/products')
         .then((response) => response);
@@ -73,6 +80,7 @@ describe('Product API', async () => {
       response.body.length.should.equal(3);
     });
     it('GET /products returns correct product data', async () => {
+      await removeSeedData();
       await seedData(productData[0]);
 
       const response = await api
@@ -88,10 +96,6 @@ describe('Product API', async () => {
   });
   describe('GET /products/:productId', () => {
     it('returns the correct product', async () => {
-      await seedData(productData[0]);
-      await seedData(productData[1]);
-      await seedData(productData[2]);
-
       const response = await api
         .get(`/api/products/${productData[1].id}`)
         .then((response) => response);
@@ -110,10 +114,6 @@ describe('Product API', async () => {
   });
   describe('GET /products/?category=', () => {
     it('returns a list of products in the selected category', async () => {
-      await seedData(productData[0]);
-      await seedData(productData[1]);
-      await seedData(productData[2]);
-
       const response = await api
         .get('/api/products/?category=2')
         .then((response) => response);
@@ -123,10 +123,6 @@ describe('Product API', async () => {
       response.body.should.deep.equal([productData[1], productData[2]]);
     });
     it('returns a empty list if the category does not return any results', async () => {
-      await seedData(productData[0]);
-      await seedData(productData[1]);
-      await seedData(productData[2]);
-
       const response = await api
         .get('/api/products/?category=5')
         .then((response) => response);
@@ -159,7 +155,7 @@ describe('Product API', async () => {
       const response = await api.post('/api/products').send(badProduct);
       const products = await db
         .query('SELECT * FROM products WHERE products.name = $1', [
-          productData[0].name,
+          badProduct.name,
         ])
         .then((response) => response.rows);
 
@@ -177,7 +173,7 @@ describe('Product API', async () => {
       const response = await api.post('/api/products').send(badProduct);
       const products = await db
         .query('SELECT * FROM products WHERE products.name = $1', [
-          productData[0].name,
+          badProduct.name,
         ])
         .then((response) => response.rows);
 
@@ -194,23 +190,23 @@ describe('Product API', async () => {
       const response = await api.post('/api/products').send(noDescription);
       const products = await db
         .query('SELECT * FROM products WHERE products.name = $1', [
-          productData[0].name,
+          noDescription.name,
         ])
         .then((response) => response.rows);
 
       response.status.should.equal(201);
-      products.length.should.equal(0);
+      products.length.should.equal(1);
     });
     it('doesnt create product if essential parameters are missing', async () => {
       const badProduct = {
-        description: '',
+        description: 'unique-test-to-see-it-didnt-make-me',
         category: 1,
       };
 
       const response = await api.post('/api/products').send(badProduct);
       const products = await db
-        .query('SELECT * FROM products WHERE products.name = $1', [
-          productData[0].name,
+        .query('SELECT * FROM products WHERE products.description = $1', [
+          badProduct.description,
         ])
         .then((response) => response.rows);
 
@@ -219,11 +215,6 @@ describe('Product API', async () => {
     });
   });
   describe('PUT /products/:productId', () => {
-    beforeEach(async () => {
-      await seedData(productData[0]);
-      await seedData(productData[1]);
-      await seedData(productData[2]);
-    });
     it('updates a product in the database', async () => {
       const updatedProduct = { ...productData[0], name: 'test-the-update' };
 
