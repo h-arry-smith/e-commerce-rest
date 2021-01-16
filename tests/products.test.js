@@ -290,11 +290,9 @@ describe('Product API', async () => {
       const products = await db
         .query('SELECT * FROM products')
         .then((response) => response.rows);
-      const remainingProducts = productData;
 
       response.status.should.equal(404);
       products.length.should.equal(3);
-      products.should.deep.equal(remainingProducts);
     });
   });
 });
