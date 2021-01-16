@@ -44,8 +44,8 @@ const seedData = async (product) => {
   ]);
 };
 
-const removeSeedData = () => {
-  db.query('DELETE FROM products');
+const removeSeedData = async () => {
+  await db.query('DELETE FROM products');
 };
 
 describe('Product API', async () => {
@@ -54,8 +54,8 @@ describe('Product API', async () => {
     await seedData(productData[1]);
     await seedData(productData[2]);
   });
-  afterEach(() => {
-    removeSeedData();
+  afterEach(async () => {
+    await removeSeedData();
   });
 
   describe('GET /products', () => {
@@ -80,16 +80,13 @@ describe('Product API', async () => {
       response.body.length.should.equal(3);
     });
     it('GET /products returns correct product data', async () => {
-      await removeSeedData();
-      await seedData(productData[0]);
-
       const response = await api
         .get('/api/products')
         .then((response) => response);
 
       response.status.should.equal(200);
       response.body.should.be.a.instanceOf(Array);
-      response.body.length.should.equal(1);
+      response.body.length.should.equal(3);
 
       response.body[0].should.deep.equal(productData[0]);
     });
