@@ -6,7 +6,7 @@ import { seedData, removeSeedData } from './helpers/product.js';
 import db from '../db/db.js';
 import createServer from '../app.js';
 
-import { getAll, findById } from '../db/product.js';
+import { getAll, findById, findByCategory } from '../db/product.js';
 
 const app = createServer();
 const api = await request(app);
@@ -53,5 +53,10 @@ describe('Product Database Logic', () => {
     const product = await findById(productData[0].id);
 
     product.should.deep.equal(productData[0]);
+  });
+  it('find a product by category', async () => {
+    const products = await findByCategory(2);
+
+    products.should.deep.equal([productData[1], productData[2]]);
   });
 });
