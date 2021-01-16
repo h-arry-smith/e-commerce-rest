@@ -108,7 +108,6 @@ describe('Product API', async () => {
 
       response.status.should.equal(404);
     });
-    it('returns 404 ');
   });
   describe('GET /products/?category=', () => {
     it('returns a list of products in the selected category', async () => {
