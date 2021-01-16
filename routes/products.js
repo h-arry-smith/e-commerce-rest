@@ -2,25 +2,29 @@ import Router from 'express-promise-router';
 import { nanoid } from 'nanoid';
 import db from '../db/db.js';
 
+const validate = (product) => {
+  const requiredParams = ['name', 'price', 'category'];
+  if (!requiredParams.every((key) => Object.keys(product).includes(key))) {
+    return 'Incorrect paramaters';
+  }
+  if (product.name === '') {
+    return 'Name must not be empty';
+  }
+  if (product.price < 0) {
+    return 'Price must be a positive number';
+  }
+  return true;
+};
+
 const validateProduct = (req, res, next) => {
   const product = req.body;
 
-  const requiredParams = ['name', 'price', 'category'];
-  if (!requiredParams.every((key) => Object.keys(product).includes(key))) {
-    res.status(400).send('Incorrect paramaters');
-    return;
+  const result = validate(product);
+  if (result === true) {
+    next();
+  } else {
+    res.status(400).send(result);
   }
-
-  if (product.name === '') {
-    res.status(400).send('Name must not be empty');
-    return;
-  }
-  if (product.price < 0) {
-    res.status(400).send('Price must be a positive number');
-    return;
-  }
-
-  next();
 };
 
 const productRouter = Router();
