@@ -86,6 +86,28 @@ describe('Product API', async () => {
       response.body[0].should.deep.equal(productData[0]);
     });
   });
+  describe('GET /products/:productId', () => {
+    it('returns the correct product', async () => {
+      await seedData(productData[0]);
+      await seedData(productData[1]);
+      await seedData(productData[2]);
+
+      const response = await api
+        .get(`/api/products/${productData[1].id}`)
+        .then((response) => response);
+
+      response.status.should.equal(200);
+      response.body.should.be.a.instanceOf(Object);
+      response.body.should.deep.equal(productData[1]);
+    });
+    it('returns 404 if product does no exist', async () => {
+      const response = await api
+        .get(`/api/products/abcdefghijnklmnfxcygf`)
+        .then((response) => response);
+
+      response.status.should.equal(404);
+    });
+  });
   afterEach(async () => {
     await removeSeedData();
   });
