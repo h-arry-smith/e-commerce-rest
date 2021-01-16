@@ -254,6 +254,48 @@ describe('Product API', async () => {
 
       response.status.should.equal(404);
     });
+    it('updates a product in the database with partial values', async () => {
+      const partialProduct = {
+        description: 'partial description update',
+      };
+      const updatedProduct = { ...productData[0], ...partialProduct };
+
+      const response = await api
+        .put(`/api/products/${productData[0].id}`)
+        .send(partialProduct);
+
+      const product = await db
+        .query('SELECT * FROM products WHERE products.id = $1', [
+          productData[0].id,
+        ])
+        .then((response) => response.rows);
+
+      response.status.should.equal(200);
+      product.length.should.equal(1);
+      product[0].should.deep.equal(updatedProduct);
+    });
+    it('wont update if the id and param id dont match', async () => {
+      const partialProduct = {
+        id: 'testtesttesttesttestt',
+      };
+
+      const response = await api
+        .put(`/api/products/${productData[0].id}`)
+        .send(partialProduct);
+
+      response.status.should.equal(400);
+    });
+    it('wont update if the object is not valid', async () => {
+      const partialProduct = {
+        price: -1000,
+      };
+
+      const response = await api
+        .put(`/api/products/${productData[0].id}`)
+        .send(partialProduct);
+
+      response.status.should.equal(400);
+    });
   });
   afterEach(async () => {
     await removeSeedData();

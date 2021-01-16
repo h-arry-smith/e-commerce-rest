@@ -88,7 +88,17 @@ productRouter.post('/', validateProduct, async (req, res) => {
 });
 
 productRouter.put('/:productId', async (req, res) => {
-  const update = req.body;
+  const update = { ...req.product, ...req.body };
+
+  const result = validate(update);
+  if (result !== true) {
+    res.status(400).send(result);
+  }
+
+  if (update.id !== req.params.productId) {
+    res.status(400).send('Can not change the ID in an update');
+  }
+
   await db.query(
     'UPDATE products SET name=$1, description=$2, price=$3, category=$4 WHERE products.id = $5',
     [update.name, update.description, update.price, update.category, update.id]
