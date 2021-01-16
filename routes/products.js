@@ -2,6 +2,15 @@ import Router from 'express-promise-router';
 import { nanoid } from 'nanoid';
 import db from '../db/db.js';
 
+import {
+  getAll,
+  findById,
+  findByCategory,
+  add,
+  update,
+  deleteById,
+} from '../db/product.js';
+
 const validate = (product) => {
   const requiredParams = ['name', 'price', 'category'];
   if (!requiredParams.every((key) => Object.keys(product).includes(key))) {
@@ -30,12 +39,7 @@ const validateProduct = (req, res, next) => {
 const productRouter = Router();
 
 productRouter.param('productId', async (req, res, next, id) => {
-  const find = await db
-    .query('SELECT * FROM products WHERE products.id = $1', [
-      req.params.productId,
-    ])
-    .then((response) => response.rows[0]);
-
+  const find = await findById(req.params.productId);
   if (!find) {
     res.status(404).send();
     return;
@@ -46,15 +50,13 @@ productRouter.param('productId', async (req, res, next, id) => {
 });
 
 productRouter.get('/', async (req, res) => {
-  let filter = '';
+  let products;
 
   if (req.query.category) {
-    filter = ` WHERE category = ${req.query.category}`;
+    products = await findByCategory(req.query.category);
+  } else {
+    products = await getAll();
   }
-
-  const products = await db
-    .query('SELECT * FROM products' + filter)
-    .then((response) => response.rows);
 
   res.status(200).send(products);
 });
@@ -71,46 +73,33 @@ productRouter.post('/', validateProduct, async (req, res) => {
     name: product.name,
     price: product.price,
     category: product.category,
+    description: product.description ? product.description : '',
   };
 
-  newProduct.description = product.description ? product.description : '';
-
-  const id = nanoid();
-  await db.query('INSERT INTO products VALUES ($1, $2, $3, $4, $5);', [
-    newProduct.id,
-    newProduct.name,
-    newProduct.description,
-    newProduct.price,
-    newProduct.category,
-  ]);
+  await add(newProduct);
 
   res.status(201).send(newProduct);
 });
 
 productRouter.put('/:productId', async (req, res) => {
-  const update = { ...req.product, ...req.body };
+  const updatedProduct = { ...req.product, ...req.body };
 
-  const result = validate(update);
+  const result = validate(updatedProduct);
   if (result !== true) {
     res.status(400).send(result);
   }
 
-  if (update.id !== req.params.productId) {
+  if (updatedProduct.id !== req.params.productId) {
     res.status(400).send('Can not change the ID in an update');
   }
 
-  await db.query(
-    'UPDATE products SET name=$1, description=$2, price=$3, category=$4 WHERE products.id = $5',
-    [update.name, update.description, update.price, update.category, update.id]
-  );
+  await update(updatedProduct);
 
   res.status(200).send();
 });
 
 productRouter.delete('/:productId', async (req, res) => {
-  await db.query('DELETE FROM products WHERE products.id = $1', [
-    req.product.id,
-  ]);
+  await deleteById(req.product.id);
 
   res.status(204).send();
 });
