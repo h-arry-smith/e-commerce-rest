@@ -25,6 +25,22 @@ const validateProduct = (req, res, next) => {
 
 const productRouter = Router();
 
+productRouter.param('productId', async (req, res, next, id) => {
+  const find = await db
+    .query('SELECT * FROM products WHERE products.id = $1', [
+      req.params.productId,
+    ])
+    .then((response) => response.rows[0]);
+
+  if (!find) {
+    res.status(404).send();
+    return;
+  }
+
+  req.product = find;
+  next();
+});
+
 productRouter.get('/', async (req, res) => {
   let filter = '';
 
@@ -40,17 +56,7 @@ productRouter.get('/', async (req, res) => {
 });
 
 productRouter.get('/:productId', async (req, res) => {
-  const product = await db
-    .query('SELECT * FROM products WHERE products.id = $1', [
-      req.params.productId,
-    ])
-    .then((response) => response.rows[0]);
-
-  if (!product) {
-    res.status(404).send();
-  }
-
-  res.status(200).send(product);
+  res.status(200).send(req.product);
 });
 
 productRouter.post('/', validateProduct, async (req, res) => {
