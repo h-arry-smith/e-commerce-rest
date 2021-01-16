@@ -108,6 +108,7 @@ describe('Product API', async () => {
 
       response.status.should.equal(404);
     });
+    it('returns 404 ');
   });
   describe('GET /products/?category=', () => {
     it('returns a list of products in the selected category', async () => {
@@ -286,7 +287,7 @@ describe('Product API', async () => {
     });
   });
   describe('DELETE /products/:productId', () => {
-    it('should delete a product from the library', async () => {
+    it('should delete a product from the database', async () => {
       const response = await api.delete(`/api/products/${productData[2].id}`);
       const products = await db
         .query('SELECT * FROM products')
