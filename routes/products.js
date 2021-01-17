@@ -1,6 +1,5 @@
 import Router from 'express-promise-router';
 import { nanoid } from 'nanoid';
-import db from '../db/db.js';
 
 import {
   getAll,
