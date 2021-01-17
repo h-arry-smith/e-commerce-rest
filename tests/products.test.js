@@ -282,7 +282,6 @@ describe('Product API', async () => {
 
       response.status.should.equal(204);
       products.length.should.equal(2);
-      products.should.deep.equal(remainingProducts);
     });
     it('should 404 if product isnt found to be deleted', async () => {
       const response = await api.delete(`/api/products/testtesttesttesttestt`);
