@@ -6,6 +6,7 @@ import createServer from '../app.js';
 import db from '../db/db.js';
 
 import { seedData, removeSeedData } from './helpers/product.js';
+import { findById, getAll } from '../db/product.js';
 
 const app = createServer();
 
@@ -49,27 +50,21 @@ describe('Product API', async () => {
     it('returns an empty list when no products in the db', async () => {
       await removeSeedData();
 
-      const response = await api
-        .get('/api/products')
-        .then((response) => response);
+      const response = await api.get('/api/products');
 
       response.status.should.equal(200);
       response.body.should.be.a.instanceOf(Array);
       response.body.length.should.equal(0);
     });
     it('returns a list of all products', async () => {
-      const response = await api
-        .get('/api/products')
-        .then((response) => response);
+      const response = await api.get('/api/products');
 
       response.status.should.equal(200);
       response.body.should.be.a.instanceOf(Array);
       response.body.length.should.equal(3);
     });
     it('returns correct product data', async () => {
-      const response = await api
-        .get('/api/products')
-        .then((response) => response);
+      const response = await api.get('/api/products');
 
       response.status.should.equal(200);
       response.body.should.be.a.instanceOf(Array);
@@ -80,9 +75,7 @@ describe('Product API', async () => {
   });
   describe('GET /products/:productId', () => {
     it('returns the correct product', async () => {
-      const response = await api
-        .get(`/api/products/${productData[1].id}`)
-        .then((response) => response);
+      const response = await api.get(`/api/products/${productData[1].id}`);
 
       response.status.should.equal(200);
       response.body.should.be.a.instanceOf(Object);
@@ -98,18 +91,14 @@ describe('Product API', async () => {
   });
   describe('GET /products/?category=', () => {
     it('returns a list of products in the selected category', async () => {
-      const response = await api
-        .get('/api/products/?category=2')
-        .then((response) => response);
+      const response = await api.get('/api/products/?category=2');
 
       response.status.should.equal(200);
       response.body.should.be.a.instanceOf(Array);
       response.body.should.deep.equal([productData[1], productData[2]]);
     });
     it('returns a empty list if the category does not return any results', async () => {
-      const response = await api
-        .get('/api/products/?category=5')
-        .then((response) => response);
+      const response = await api.get('/api/products/?category=5');
 
       response.status.should.equal(200);
       response.body.should.be.a.instanceOf(Array);
@@ -137,14 +126,10 @@ describe('Product API', async () => {
       };
 
       const response = await api.post('/api/products').send(badProduct);
-      const products = await db
-        .query('SELECT * FROM products WHERE products.name = $1', [
-          badProduct.name,
-        ])
-        .then((response) => response.rows);
+      const products = await getAll();
 
       response.status.should.equal(400);
-      products.length.should.equal(0);
+      products.length.should.equal(3);
     });
     it('price must not be negative', async () => {
       const badProduct = {
@@ -155,14 +140,10 @@ describe('Product API', async () => {
       };
 
       const response = await api.post('/api/products').send(badProduct);
-      const products = await db
-        .query('SELECT * FROM products WHERE products.name = $1', [
-          badProduct.name,
-        ])
-        .then((response) => response.rows);
+      const products = await getAll();
 
       response.status.should.equal(400);
-      products.length.should.equal(0);
+      products.length.should.equal(3);
     });
     it('description is an optional paramater', async () => {
       const noDescription = {
@@ -172,14 +153,10 @@ describe('Product API', async () => {
       };
 
       const response = await api.post('/api/products').send(noDescription);
-      const products = await db
-        .query('SELECT * FROM products WHERE products.name = $1', [
-          noDescription.name,
-        ])
-        .then((response) => response.rows);
+      const products = await getAll();
 
       response.status.should.equal(201);
-      products.length.should.equal(1);
+      products.length.should.equal(4);
     });
     it('doesnt create product if essential parameters are missing', async () => {
       const badProduct = {
@@ -188,17 +165,13 @@ describe('Product API', async () => {
       };
 
       const response = await api.post('/api/products').send(badProduct);
-      const products = await db
-        .query('SELECT * FROM products WHERE products.description = $1', [
-          badProduct.description,
-        ])
-        .then((response) => response.rows);
+      const products = await getAll();
 
       response.status.should.equal(400);
-      products.length.should.equal(0);
+      products.length.should.equal(3);
     });
   });
-  describe('PUT /products/:productId', () => {
+  describe('PUT /products/:productId', async () => {
     it('updates a product in the database', async () => {
       const updatedProduct = { ...productData[0], name: 'test-the-update' };
 
@@ -206,15 +179,10 @@ describe('Product API', async () => {
         .put(`/api/products/${productData[0].id}`)
         .send(updatedProduct);
 
-      const product = await db
-        .query('SELECT * FROM products WHERE products.id = $1', [
-          productData[0].id,
-        ])
-        .then((response) => response.rows);
+      const product = await findById(productData[0].id);
 
       response.status.should.equal(200);
-      product.length.should.equal(1);
-      product[0].should.deep.equal(updatedProduct);
+      product.should.deep.equal(updatedProduct);
     });
     it('returns a 404 if the product id does not exist', async () => {
       const updatedProduct = {
@@ -239,15 +207,10 @@ describe('Product API', async () => {
         .put(`/api/products/${productData[0].id}`)
         .send(partialProduct);
 
-      const product = await db
-        .query('SELECT * FROM products WHERE products.id = $1', [
-          productData[0].id,
-        ])
-        .then((response) => response.rows);
+      const product = await findById(productData[0].id);
 
       response.status.should.equal(200);
-      product.length.should.equal(1);
-      product[0].should.deep.equal(updatedProduct);
+      product.should.deep.equal(updatedProduct);
     });
     it('wont update if the id and param id dont match', async () => {
       const partialProduct = {
@@ -275,9 +238,7 @@ describe('Product API', async () => {
   describe('DELETE /products/:productId', () => {
     it('should delete a product from the database', async () => {
       const response = await api.delete(`/api/products/${productData[2].id}`);
-      const products = await db
-        .query('SELECT * FROM products')
-        .then((response) => response.rows);
+      const products = await getAll();
       const remainingProducts = [productData[0], productData[1]];
 
       response.status.should.equal(204);
@@ -285,9 +246,7 @@ describe('Product API', async () => {
     });
     it('should 404 if product isnt found to be deleted', async () => {
       const response = await api.delete(`/api/products/testtesttesttesttestt`);
-      const products = await db
-        .query('SELECT * FROM products')
-        .then((response) => response.rows);
+      const products = await getAll();
 
       response.status.should.equal(404);
       products.length.should.equal(3);
