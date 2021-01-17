@@ -1,10 +1,6 @@
 import 'chai/register-should.js';
-import request from 'supertest';
 import { nanoid } from 'nanoid';
-import { seedData, removeSeedData } from './helpers/product.js';
-
-import db from '../db/db.js';
-import createServer from '../app.js';
+import { seedData, removeSeedData } from '../helpers/product.js';
 
 import {
   getAll,
@@ -13,10 +9,7 @@ import {
   add,
   update,
   deleteById,
-} from '../db/product.js';
-
-const app = createServer();
-const api = await request(app);
+} from '../../db/product.js';
 
 const productData = [
   {
