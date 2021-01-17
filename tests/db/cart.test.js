@@ -1,7 +1,7 @@
 import 'chai/register-should.js';
 
 import { nanoid } from 'nanoid';
-import { findById, createCart } from '../../db/cart.js';
+import { findById, createCart, getAll } from '../../db/cart.js';
 import { add as addUser } from '../../db/user.js';
 import { removeSeedData, seedData } from '../helpers/cart.js';
 
@@ -41,5 +41,11 @@ describe('Cart Database Logic', () => {
     const cart = await findById(cartId);
     cart.id.should.equal(cartId);
     cart.user_id.should.equal(newCartUser);
+  });
+  it('gets all carts from database', async () => {
+    const carts = await getAll();
+
+    carts.should.be.a.instanceOf(Array);
+    carts.length.should.equal(3);
   });
 });

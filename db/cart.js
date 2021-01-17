@@ -12,3 +12,9 @@ export const createCart = async (user_id) => {
   await db.query('INSERT INTO carts VALUES ($1, $2)', [cart, user_id]);
   return cart;
 };
+
+export const getAll = async () => {
+  return await db
+    .query('SELECT * FROM carts')
+    .then((response) => response.rows);
+};
