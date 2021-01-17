@@ -1,7 +1,6 @@
 import 'chai/register-should.js';
 import request from 'supertest';
 
-import express from 'express';
 import { nanoid } from 'nanoid';
 import createServer from '../app.js';
 import db from '../db/db.js';
@@ -47,7 +46,7 @@ describe('Product API', async () => {
   });
 
   describe('GET /products', () => {
-    it('GET /products returns an empty list when no products in the db', async () => {
+    it('returns an empty list when no products in the db', async () => {
       await removeSeedData();
 
       const response = await api
@@ -58,7 +57,7 @@ describe('Product API', async () => {
       response.body.should.be.a.instanceOf(Array);
       response.body.length.should.equal(0);
     });
-    it('GET /products returns a list of all products', async () => {
+    it('returns a list of all products', async () => {
       const response = await api
         .get('/api/products')
         .then((response) => response);
@@ -67,7 +66,7 @@ describe('Product API', async () => {
       response.body.should.be.a.instanceOf(Array);
       response.body.length.should.equal(3);
     });
-    it('GET /products returns correct product data', async () => {
+    it('returns correct product data', async () => {
       const response = await api
         .get('/api/products')
         .then((response) => response);
