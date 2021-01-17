@@ -22,3 +22,10 @@ export const add = async (user) => {
     user.fullname,
   ]);
 };
+
+export const update = async (user) => {
+  return await db.query(
+    'UPDATE users SET username=$1, password=$2, address_id=$3, fullname=$4 WHERE users.id = $5',
+    [user.username, user.password, user.address_id, user.fullname, user.id]
+  );
+};

@@ -2,7 +2,7 @@ import 'chai/register-should.js';
 import { nanoid } from 'nanoid';
 import { seedData, removeSeedData } from '../helpers/user.js';
 
-import { getAll, findById, add } from '../../db/user.js';
+import { getAll, findById, add, update, deleteById } from '../../db/user.js';
 
 const newUser = {
   id: nanoid(),
@@ -62,5 +62,25 @@ describe('User Database Logic', async () => {
     const users = await getAll();
 
     users.length.should.equal(4);
+  });
+  it('updates a user', async () => {
+    const updateUser = {
+      id: users[0].id,
+      username: 'change-the-name',
+      password: 'change-the-password',
+      address_id: 'testtesttesttesttestt',
+      fullname: 'Name Changey',
+    };
+
+    await update(updateUser);
+    const user = await findById(updateUser.id);
+
+    user.should.deep.equal(updateUser);
+  });
+  it('deletes a user', async () => {
+    await deleteById(users[0].id);
+    const allUsers = await getAll();
+
+    allUsers.length.should.equal(2);
   });
 });

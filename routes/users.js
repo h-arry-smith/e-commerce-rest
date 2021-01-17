@@ -1,6 +1,6 @@
 import Router from 'express-promise-router';
 import { nanoid } from 'nanoid';
-import { getAll, findById, add } from '../db/user.js';
+import { getAll, findById, add, update, deleteById } from '../db/user.js';
 
 const userRouter = Router();
 
@@ -63,4 +63,20 @@ userRouter.post('/', userValidation, async (req, res) => {
   res.status(201).send(userObject);
 });
 
+userRouter.put('/:userId', async (req, res) => {
+  if (req.user.id !== req.body.id) {
+    res.status(400).send('id mismatch');
+    return;
+  }
+
+  const updateUser = { ...req.user, ...req.body };
+
+  if (validate(updateUser) !== true) {
+    res.status(400).send('user object is invalid');
+    return;
+  }
+  await update(updateUser);
+
+  res.status(200).send();
+});
 export default userRouter;

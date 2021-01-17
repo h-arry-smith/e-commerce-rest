@@ -5,7 +5,7 @@ import { nanoid } from 'nanoid';
 import createServer from '../app.js';
 
 import { removeSeedData, seedData } from './helpers/user.js';
-import { getAll } from '../db/user.js';
+import { findById, getAll } from '../db/user.js';
 
 const app = createServer();
 
@@ -166,6 +166,92 @@ describe('Users API', () => {
         status.should.equal(400);
         users.length.should.equal(3);
       });
+    });
+  });
+  describe('PUT /users/:userId', async () => {
+    it('updates a user in the database', async () => {
+      const updateUser = {
+        id: userData[0].id,
+        username: 'change-the-name',
+        password: 'change-the-password',
+        address_id: 'testtesttesttesttestt',
+        fullname: 'Name Changey',
+      };
+
+      const { status, body } = await api
+        .put(`/api/users/${updateUser.id}`)
+        .send(updateUser);
+      const user = await findById(userData[0].id);
+
+      status.should.equal(200);
+      user.should.deep.equal(updateUser);
+    });
+    it('returns a 404 if id is not found', async () => {
+      const updateUser = {
+        id: 'bad-id',
+        username: 'change-the-name',
+        password: 'change-the-password',
+        address_id: 'testtesttesttesttestt',
+        fullname: 'Name Changey',
+      };
+
+      const { status, body } = await api
+        .put(`/api/users/${updateUser.id}`)
+        .send(updateUser);
+      const user = await findById(userData[0].id);
+
+      status.should.equal(404);
+      user.should.deep.equal(userData[0]);
+    });
+    it('updates with partial values', async () => {
+      const updateUser = {
+        id: userData[0].id,
+        username: 'change-the-name',
+        password: 'change-the-password',
+      };
+
+      const { status, body } = await api
+        .put(`/api/users/${updateUser.id}`)
+        .send(updateUser);
+      const user = await findById(userData[0].id);
+
+      status.should.equal(200);
+      user.username.should.equal(updateUser.username);
+      user.password.should.equal(updateUser.password);
+    });
+    it('must have the same id and param id', async () => {
+      const updateUser = {
+        id: 'bad-id',
+        username: 'change-the-name',
+        password: 'change-the-password',
+        address_id: 'testtesttesttesttestt',
+        fullname: 'Name Changey',
+      };
+
+      const { status, body } = await api
+        .put(`/api/users/${userData[0].id}`)
+        .send(updateUser);
+      const user = await findById(userData[0].id);
+
+      status.should.equal(400);
+      user.should.deep.equal(userData[0]);
+    });
+    it('validates the object and 400 if invalid', async () => {
+      const updateUser = {
+        id: -1,
+        username: 'change-the-name',
+        password: 'change-the-password',
+        address_id: 'testtesttesttesttestt',
+        fullname: 'Name Changey',
+      };
+
+      const { status, body } = await api
+        .put(`/api/users/${userData[0].id}`)
+        .send(updateUser);
+      const user = await findById(userData[0].id);
+
+      status.should.equal(400);
+      user.should.deep.equal(userData[0]);
     });
   });
 });
