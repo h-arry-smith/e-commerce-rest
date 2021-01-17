@@ -46,34 +46,39 @@ describe('Users API', () => {
   describe('GET /users', async () => {
     it('returns an empty list of when no users in the DB', async () => {
       await removeSeedData();
-      const { status, body } = await api
-        .get('/api/users')
-        .then((response) => response);
+      const { status, body } = await api.get('/api/users');
 
       status.should.equal(200);
       body.should.be.a.instanceOf(Array);
       body.length.should.equal(0);
     });
     it('returns a list of all users', async () => {
-      const { status, body } = await api
-        .get('/api/users')
-        .then((response) => response);
+      const { status, body } = await api.get('/api/users');
 
       status.should.equal(200);
       body.should.be.a.instanceOf(Array);
       body.length.should.equal(3);
     });
     it('returns correctly formatted user objects', async () => {
-      const { status, body } = await api
-        .get('/api/users')
-        .then((response) => response);
+      const { status, body } = await api.get('/api/users');
 
       status.should.equal(200);
       body.should.be.a.instanceOf(Array);
       body.should.deep.equal(userData);
     });
   });
-  // describe('GET /users/:userId', () => {
-  //   const users =
-  // })
+  describe('GET /users/:userId', () => {
+    it('returns the correct user', async () => {
+      const { status, body } = await api.get(`/api/users/${userData[0].id}`);
+
+      status.should.equal(200);
+      body.should.be.a.instanceOf(Object);
+      body.should.deep.equal(userData[0]);
+    });
+    it('returns a 404 if the user doesnt exist', async () => {
+      const { status } = await api.get(`/api/users/testtesttesttesttestt`);
+
+      status.should.equal(404);
+    });
+  });
 });

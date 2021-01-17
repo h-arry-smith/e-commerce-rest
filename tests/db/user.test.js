@@ -2,7 +2,7 @@ import 'chai/register-should.js';
 import { nanoid } from 'nanoid';
 import { seedData, removeSeedData } from '../helpers/user.js';
 
-import { getAll } from '../../db/user.js';
+import { getAll, findById } from '../../db/user.js';
 
 const users = [
   {
@@ -42,5 +42,11 @@ describe('User Database Logic', async () => {
 
     users.should.be.a.instanceOf(Array);
     users.length.should.equal(3);
+  });
+  it('finds a user by id', async () => {
+    const user = await findById(users[0].id);
+
+    user.should.be.a.instanceOf(Object);
+    user.should.deep.equal(users[0]);
   });
 });
