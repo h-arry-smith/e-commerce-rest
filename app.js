@@ -1,5 +1,6 @@
 import express from 'express';
 import morgan from 'morgan';
+import cartsRouter from './routes/carts.js';
 
 import productRouter from './routes/products.js';
 import userRouter from './routes/users.js';
@@ -14,6 +15,7 @@ const createServer = () => {
 
   api.use('/products', productRouter);
   api.use('/users', userRouter);
+  api.use('/carts', cartsRouter);
 
   app.use(express.json());
   app.use('/api', api);
