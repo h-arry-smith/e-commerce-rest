@@ -1,4 +1,6 @@
+import { response } from 'express';
 import { nanoid } from 'nanoid';
+import productRouter from '../routes/products.js';
 import db from './db.js';
 
 export const findById = async (id) => {
@@ -19,7 +21,28 @@ export const getAll = async () => {
     .then((response) => response.rows);
 };
 
+export const updateCart = async (cartId, productId, quantity) => {
+  await db.query(
+    'UPDATE carts_products SET quantity = $1 WHERE cart_id = $2 AND products_id = $3',
+    [quantity, cartId, productId]
+  );
+};
+
 export const addProductToCart = async (cartId, productId, quantity) => {
+  const find = await db
+    .query(
+      `SELECT * FROM carts_products
+  WHERE carts_products.cart_id = $1
+   AND carts_products.products_id = $2`,
+      [cartId, productId]
+    )
+    .then((response) => response.rows[0]);
+
+  if (find) {
+    await updateCart(cartId, productId, quantity + find.quantity);
+    return;
+  }
+
   await db.query('INSERT INTO carts_products VALUES ($1, $2, $3)', [
     cartId,
     productId,

@@ -7,6 +7,7 @@ import {
   getAll,
   getCartContents,
   addProductToCart,
+  updateCart,
 } from '../../db/cart.js';
 import { add as addUser } from '../../db/user.js';
 import { add as addProduct } from '../../db/product.js';
@@ -17,6 +18,14 @@ const carts = [
   { id: nanoid(), user: nanoid() },
   { id: nanoid(), user: nanoid() },
 ];
+
+const product = {
+  id: nanoid(),
+  name: 'test-product',
+  description: 'test-product-description',
+  price: '$123.45',
+  category: 1,
+};
 
 describe('Cart Database Logic', () => {
   beforeEach(async () => {
@@ -55,15 +64,29 @@ describe('Cart Database Logic', () => {
     carts.should.be.a.instanceOf(Array);
     carts.length.should.equal(3);
   });
-  it('gets the contents of a cart by id', async () => {
-    const product = {
-      id: nanoid(),
-      name: 'test-product',
-      description: 'test-product-description',
-      price: '$123.45',
-      category: 1,
-    };
+  it('update quantity of a product in a cart', async () => {
+    await addProduct(product);
+    await addProductToCart(carts[0].id, product.id, 13);
+    await updateCart(carts[0].id, product.id, 22);
 
+    const cartContents = await getCartContents(carts[0].id);
+
+    cartContents.should.be.a.instanceOf(Array);
+    cartContents.length.should.equal(1);
+    cartContents[0].should.deep.equal({ ...product, quantity: 22 });
+  });
+  it('multiple cart adds sum totals', async () => {
+    await addProduct(product);
+    await addProductToCart(carts[0].id, product.id, 13);
+    await addProductToCart(carts[0].id, product.id, 27);
+
+    const cartContents = await getCartContents(carts[0].id);
+
+    cartContents.should.be.a.instanceOf(Array);
+    cartContents.length.should.equal(1);
+    cartContents[0].should.deep.equal({ ...product, quantity: 40 });
+  });
+  it('gets the contents of a cart by id', async () => {
     await addProduct(product);
     await addProductToCart(carts[0].id, product.id, 99);
 
