@@ -29,3 +29,7 @@ export const update = async (user) => {
     [user.username, user.password, user.address_id, user.fullname, user.id]
   );
 };
+
+export const deleteById = async (id) => {
+  return await db.query('DELETE FROM users WHERE users.id = $1', [id]);
+};

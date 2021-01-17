@@ -254,4 +254,13 @@ describe('Users API', () => {
       user.should.deep.equal(userData[0]);
     });
   });
+  describe('DELETE /users/:userId', async () => {
+    it('deletes a user from the database', async () => {
+      const { status, body } = await api.delete(`/api/users/${userData[0].id}`);
+      const users = await getAll();
+
+      status.should.equal(204);
+      users.length.should.equal(2);
+    });
+  });
 });

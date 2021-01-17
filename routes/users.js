@@ -79,4 +79,11 @@ userRouter.put('/:userId', async (req, res) => {
 
   res.status(200).send();
 });
+
+userRouter.delete('/:userId', async (req, res) => {
+  await deleteById(req.user.id);
+
+  res.status(204).send();
+});
+
 export default userRouter;
