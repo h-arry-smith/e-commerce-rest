@@ -12,6 +12,8 @@ export const seedData = async (cart) => {
 };
 
 export const removeSeedData = async () => {
+  await db.query('DELETE FROM carts_products');
   await db.query('DELETE FROM carts');
   await db.query('DELETE FROM users');
+  await db.query('DELETE FROM products');
 };
