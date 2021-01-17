@@ -5,6 +5,7 @@ import { nanoid } from 'nanoid';
 import createServer from '../app.js';
 
 import { removeSeedData, seedData } from './helpers/user.js';
+import { getAll } from '../db/user.js';
 
 const app = createServer();
 
@@ -79,6 +80,92 @@ describe('Users API', () => {
       const { status } = await api.get(`/api/users/testtesttesttesttestt`);
 
       status.should.equal(404);
+    });
+  });
+  describe('POST /users', async () => {
+    it('creates a new user', async () => {
+      const newUser = {
+        username: 'new-user',
+        password: 'new-user-password',
+        address_id: 'testtesttesttesttestt',
+        fullname: 'Newbie Testubey',
+      };
+
+      const { status, body } = await api.post(`/api/users`).send(newUser);
+
+      status.should.equal(201);
+      body.username.should.equal(newUser.username);
+      body.password.should.equal(newUser.password);
+      body.address_id.should.equal(newUser.address_id);
+      body.fullname.should.equal(newUser.fullname);
+    });
+    it('wont add two users with the same user names', async () => {
+      const newUser = {
+        username: 'new-user',
+        password: 'new-user-password',
+        address_id: 'testtesttesttesttestt',
+        fullname: 'Newbie Testubey',
+      };
+
+      await api.post(`/api/users`).send(newUser);
+      const { status, body } = await api.post(`/api/users`).send(newUser);
+      const users = await getAll();
+
+      status.should.equal(400);
+      users.length.should.equal(4);
+    });
+    it('all fields are required', async () => {
+      const badUser = {};
+
+      const { status, body } = await api.post(`/api/users`).send(badUser);
+      const users = await getAll();
+
+      status.should.equal(400);
+      users.length.should.equal(3);
+    });
+    describe('validation', () => {
+      it('validates the username field is string', async () => {
+        const badUser = {
+          username: -1,
+          password: 'new-user-password',
+          address_id: 'testtesttesttesttestt',
+          fullname: 'Newbie Testubey',
+        };
+
+        const { status, body } = await api.post(`/api/users`).send(badUser);
+        const users = await getAll();
+
+        status.should.equal(400);
+        users.length.should.equal(3);
+      });
+      it('validates the password field is string', async () => {
+        const badUser = {
+          username: 'new-user',
+          password: -1,
+          address_id: 'testtesttesttesttestt',
+          fullname: 'Newbie Testubey',
+        };
+
+        const { status, body } = await api.post(`/api/users`).send(badUser);
+        const users = await getAll();
+
+        status.should.equal(400);
+        users.length.should.equal(3);
+      });
+      it('validates the address_id is of the correct format', async () => {
+        const badUser = {
+          username: 'new-user',
+          password: 'new-user-password',
+          address_id: 'bad-id',
+          fullname: 'Newbie Testubey',
+        };
+
+        const { status, body } = await api.post(`/api/users`).send(badUser);
+        const users = await getAll();
+
+        status.should.equal(400);
+        users.length.should.equal(3);
+      });
     });
   });
 });

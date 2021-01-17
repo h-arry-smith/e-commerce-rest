@@ -2,7 +2,15 @@ import 'chai/register-should.js';
 import { nanoid } from 'nanoid';
 import { seedData, removeSeedData } from '../helpers/user.js';
 
-import { getAll, findById } from '../../db/user.js';
+import { getAll, findById, add } from '../../db/user.js';
+
+const newUser = {
+  id: nanoid(),
+  username: 'new-user',
+  password: 'new-user-password',
+  address_id: 'testtesttesttesttestt',
+  fullname: 'Newbie Testmcface',
+};
 
 const users = [
   {
@@ -48,5 +56,11 @@ describe('User Database Logic', async () => {
 
     user.should.be.a.instanceOf(Object);
     user.should.deep.equal(users[0]);
+  });
+  it('adds a new user', async () => {
+    await add(newUser);
+    const users = await getAll();
+
+    users.length.should.equal(4);
   });
 });

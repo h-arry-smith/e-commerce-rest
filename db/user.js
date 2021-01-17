@@ -12,3 +12,13 @@ export const findById = async (id) => {
     .query('SELECT * FROM users WHERE users.id = $1', [id])
     .then((response) => response.rows[0]);
 };
+
+export const add = async (user) => {
+  return await db.query('INSERT INTO users VALUES ($1, $2, $3, $4, $5)', [
+    user.id,
+    user.username,
+    user.password,
+    user.address_id,
+    user.fullname,
+  ]);
+};
