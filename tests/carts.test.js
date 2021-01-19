@@ -363,4 +363,26 @@ describe('Carts API', async () => {
       status.should.equal(404);
     });
   });
+  describe('GET /carts/?userId=', async () => {
+    it('gets a users cart as a query', async () => {
+      const cartId = await createCart(user.id);
+      await seedCartProducts(products, cartId);
+
+      const { status, body } = await api.get(`/api/carts/?userId=${user.id}`);
+
+      status.should.equal(200);
+      body.products.length.should.equal(3);
+      body.should.deep.equal({ cartId: cartId, products });
+    });
+    it('404 if user does not exist', async () => {
+      const cartId = await createCart(user.id);
+      await seedCartProducts(products, cartId);
+
+      const { status } = await api.get(
+        `/api/carts/?userId=testtesttesttesttestt`
+      );
+
+      status.should.equal(404);
+    });
+  });
 });

@@ -23,7 +23,19 @@ cartsRouter.param('cartId', async (req, res, next, id) => {
 });
 
 cartsRouter.get('/', async (req, res) => {
-  const carts = await getAll();
+  let carts = await getAll();
+  if (req.query.userId) {
+    const userCart = carts.map((cart) => {
+      if (cart.user_id === req.query.userId) {
+        return cart.id;
+      }
+    })[0];
+
+    if (userCart === undefined) {
+      return res.status(404).send();
+    }
+    carts = await getCartContents(userCart);
+  }
 
   res.status(200).send(carts);
 });
