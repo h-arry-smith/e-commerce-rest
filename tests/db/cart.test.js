@@ -10,6 +10,7 @@ import {
   updateCart,
   removeProductFromCart,
   getProductQuantityFromCart,
+  deleteCart,
 } from '../../db/cart.js';
 import { add as addUser } from '../../db/user.js';
 import { add as addProduct } from '../../db/product.js';
@@ -149,5 +150,12 @@ describe('Cart Database Logic', () => {
     cartContents.should.be.a.instanceOf(Object);
     cartContents.products.should.be.a.instanceOf(Array);
     cartContents.products.should.deep.equal([{ ...product, quantity: 5 }]);
+  });
+  it('deletes a cart cleanly from the database', async () => {
+    await deleteCart(carts[1].id);
+
+    const dbCarts = await getAll();
+
+    dbCarts.length.should.equal(2);
   });
 });

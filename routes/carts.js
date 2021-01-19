@@ -7,6 +7,7 @@ import {
   getCartContents,
   removeProductFromCart,
   updateCart,
+  deleteCart,
 } from '../db/cart.js';
 
 const cartsRouter = Router();
@@ -47,6 +48,12 @@ cartsRouter.get('/:cartId', async (req, res) => {
   }
 
   res.status(200).send(contents);
+});
+
+cartsRouter.delete('/:cartId', async (req, res) => {
+  await deleteCart(req.cartId);
+
+  res.status(204).send();
 });
 
 cartsRouter.post('/', async (req, res) => {

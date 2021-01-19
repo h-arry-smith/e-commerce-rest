@@ -385,4 +385,20 @@ describe('Carts API', async () => {
       status.should.equal(404);
     });
   });
+  describe('DELETE /carts/:cartId', async () => {
+    it('delete a cart cleanly', async () => {
+      const cartId = await createCart(user.id);
+      await seedCartProducts(products, cartId);
+
+      const { status, body } = await api.delete(`/api/carts/${cartId}`);
+
+      status.should.equal(204);
+
+      const carts = await getAll();
+      carts.length.should.equal(0);
+
+      const tryToFind = await api.get(`/api/carts/${cartId}`);
+      tryToFind.status.should.equal(404);
+    });
+  });
 });

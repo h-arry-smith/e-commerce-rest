@@ -74,6 +74,11 @@ export const getCartContents = async (cartId) => {
   return { cartId, products: products ? products : [] };
 };
 
+export const deleteCart = async (cartId) => {
+  await db.query(`DELETE FROM carts_products WHERE cart_id = $1`, [cartId]);
+  await db.query(`DELETE FROM carts WHERE id = $1`, [cartId]);
+};
+
 const deleteProduct = async (cartId, productId) => {
   return await db.query(
     `DELETE FROM carts_products WHERE cart_id = $1 AND products_id = $2`,
