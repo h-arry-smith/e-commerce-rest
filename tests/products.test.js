@@ -95,7 +95,7 @@ describe('Product API', async () => {
 
       response.status.should.equal(200);
       response.body.should.be.a.instanceOf(Array);
-      response.body.should.deep.equal([productData[1], productData[2]]);
+      response.body.should.have.deep.members([productData[1], productData[2]]);
     });
     it('returns a empty list if the category does not return any results', async () => {
       const response = await api.get('/api/products/?category=5');
