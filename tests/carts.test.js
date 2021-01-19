@@ -311,4 +311,56 @@ describe('Carts API', async () => {
       ]);
     });
   });
+  describe('GET /carts', async () => {
+    it('returns a list of carts', async () => {
+      const cartId = await createCart(user.id);
+
+      const { status, body } = await api.get('/api/carts');
+
+      status.should.equal(200);
+      body.should.be.a.instanceOf(Array);
+      body.should.have.deep.members([{ id: cartId, user_id: user.id }]);
+    });
+    it('returns an empty list if no carts', async () => {
+      const { status, body } = await api.get('/api/carts');
+
+      status.should.equal(200);
+      body.should.be.a.instanceOf(Array);
+      body.length.should.equal(0);
+    });
+  });
+  describe('GET /carts/:cartId', async () => {
+    it('returns the contents of a specific cart', async () => {
+      const cartId = await createCart(user.id);
+      await seedCartProducts(products, cartId);
+
+      const { status, body } = await api.get(`/api/carts/${cartId}`);
+
+      status.should.equal(200);
+
+      body.should.be.a.instanceOf(Object);
+      body.products.length.should.equal(3);
+      body.should.deep.equal({ cartId: cartId, products });
+    });
+    it('returns the the correct object for an empty cart', async () => {
+      const cartId = await createCart(user.id);
+      // await seedCartProducts(products, cartId);
+
+      const { status, body } = await api.get(`/api/carts/${cartId}`);
+
+      status.should.equal(200);
+
+      body.should.be.a.instanceOf(Object);
+      body.products.length.should.equal(0);
+      body.products.should.deep.equal([]);
+    });
+    it('404 if it cant find the cart', async () => {
+      const cartId = await createCart(user.id);
+      await seedCartProducts(products, cartId);
+
+      const { status } = await api.get(`/api/carts/testtesttesttesttestt`);
+
+      status.should.equal(404);
+    });
+  });
 });
