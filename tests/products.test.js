@@ -70,7 +70,7 @@ describe('Product API', async () => {
       response.body.should.be.a.instanceOf(Array);
       response.body.length.should.equal(3);
 
-      response.body[0].should.deep.equal(productData[0]);
+      response.body.should.have.deep.members(productData);
     });
   });
   describe('GET /products/:productId', () => {
