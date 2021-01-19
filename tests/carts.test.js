@@ -83,9 +83,11 @@ describe('Carts API', async () => {
 
       const contents = await getCartContents(cartId);
 
-      contents.should.be.a.instanceOf(Array);
-      contents.length.should.equal(1);
-      contents[0].should.deep.equal({ ...product, quantity: 123 });
+      contents.should.be.a.instanceOf(Object);
+      contents.products.length.should.equal(1);
+      contents.products.should.deep.have.members([
+        { ...product, quantity: 123 },
+      ]);
     });
     it('multiple products will sum rather than create seperate entries', async () => {
       const cartId = await createCart(user.id);
@@ -102,9 +104,11 @@ describe('Carts API', async () => {
 
       const contents = await getCartContents(cartId);
 
-      contents.should.be.a.instanceOf(Array);
-      contents.length.should.equal(1);
-      contents[0].should.deep.equal({ ...product, quantity: 100 });
+      contents.should.be.a.instanceOf(Object);
+      contents.products.length.should.equal(1);
+      contents.products.should.have.deep.members([
+        { ...product, quantity: 100 },
+      ]);
     });
     it('can add multiple products in one request', async () => {
       const cartId = await createCart(user.id);
@@ -130,11 +134,13 @@ describe('Carts API', async () => {
 
       const contents = await getCartContents(cartId);
 
-      contents.should.be.a.instanceOf(Array);
-      contents.length.should.equal(3);
-      contents[0].should.deep.equal({ ...products[0], quantity: 0 });
-      contents[1].should.deep.equal({ ...products[1], quantity: 1 });
-      contents[2].should.deep.equal({ ...products[2], quantity: 2 });
+      contents.should.be.a.instanceOf(Object);
+      contents.products.length.should.equal(3);
+      contents.products.should.have.deep.members([
+        { ...products[0], quantity: 0 },
+        { ...products[1], quantity: 1 },
+        { ...products[2], quantity: 2 },
+      ]);
     });
   });
   describe('POST /carts/remove', async () => {
@@ -150,9 +156,9 @@ describe('Carts API', async () => {
 
       const contents = await getCartContents(cartId);
 
-      contents.should.be.a.instanceOf(Array);
-      contents.length.should.equal(2);
-      contents.should.have.deep.members([
+      contents.should.be.a.instanceOf(Object);
+      contents.products.length.should.equal(2);
+      contents.products.should.have.deep.members([
         { ...products[0], quantity: 4 },
         { ...products[2], quantity: 6 },
       ]);
@@ -169,9 +175,9 @@ describe('Carts API', async () => {
 
       const contents = await getCartContents(cartId);
 
-      contents.should.be.a.instanceOf(Array);
-      contents.length.should.equal(3);
-      contents.should.deep.equal([
+      contents.should.be.a.instanceOf(Object);
+      contents.products.length.should.equal(3);
+      contents.products.should.have.deep.members([
         { ...products[0], quantity: 4 },
         { ...products[1], quantity: 5 },
         { ...products[2], quantity: 1 },
@@ -193,9 +199,11 @@ describe('Carts API', async () => {
 
       const contents = await getCartContents(cartId);
 
-      contents.should.be.a.instanceOf(Array);
-      contents.length.should.equal(1);
-      contents.should.deep.equal([{ ...products[0], quantity: 4 }]);
+      contents.should.be.a.instanceOf(Object);
+      contents.products.length.should.equal(1);
+      contents.products.should.have.deep.members([
+        { ...products[0], quantity: 4 },
+      ]);
     });
     it('removes mutiple products at once', async () => {
       const cartId = await createCart(user.id);
@@ -210,9 +218,11 @@ describe('Carts API', async () => {
 
       const contents = await getCartContents(cartId);
 
-      contents.should.be.a.instanceOf(Array);
-      contents.length.should.equal(1);
-      contents.should.deep.equal([{ ...products[1], quantity: 5 }]);
+      contents.should.be.a.instanceOf(Object);
+      contents.products.length.should.equal(1);
+      contents.products.should.have.deep.members([
+        { ...products[1], quantity: 5 },
+      ]);
     });
     it('removes mutiple products at once with differing quantities', async () => {
       const cartId = await createCart(user.id);
@@ -228,9 +238,9 @@ describe('Carts API', async () => {
 
       const contents = await getCartContents(cartId);
 
-      contents.should.be.a.instanceOf(Array);
-      contents.length.should.equal(3);
-      contents.should.deep.equal([
+      contents.should.be.a.instanceOf(Object);
+      contents.products.length.should.equal(3);
+      contents.products.should.have.deep.members([
         { ...products[0], quantity: 1 },
         { ...products[1], quantity: 4 },
         { ...products[2], quantity: 2 },
@@ -250,9 +260,9 @@ describe('Carts API', async () => {
 
       const contents = await getCartContents(cartId);
 
-      contents.should.be.a.instanceOf(Array);
-      contents.length.should.equal(3);
-      contents.should.have.deep.members([
+      contents.should.be.a.instanceOf(Object);
+      contents.products.length.should.equal(3);
+      contents.products.should.have.deep.members([
         { ...products[0], quantity: 12 },
         { ...products[1], quantity: 5 },
         { ...products[2], quantity: 6 },
@@ -274,9 +284,11 @@ describe('Carts API', async () => {
 
       const contents = await getCartContents(cartId);
 
-      contents.should.be.a.instanceOf(Array);
-      contents.length.should.equal(1);
-      contents.should.deep.equal([{ ...products[2], quantity: 6 }]);
+      contents.should.be.a.instanceOf(Object);
+      contents.products.length.should.equal(1);
+      contents.products.should.have.deep.members([
+        { ...products[2], quantity: 6 },
+      ]);
     });
     it('update products correctly with a list of products', async () => {
       const cartId = await createCart(user.id);
@@ -291,9 +303,9 @@ describe('Carts API', async () => {
 
       const contents = await getCartContents(cartId);
 
-      contents.should.be.a.instanceOf(Array);
-      contents.length.should.equal(2);
-      contents.should.have.deep.members([
+      contents.should.be.a.instanceOf(Object);
+      contents.products.length.should.equal(2);
+      contents.products.should.have.deep.members([
         { ...products[1], quantity: 88 },
         { ...products[2], quantity: 6 },
       ]);

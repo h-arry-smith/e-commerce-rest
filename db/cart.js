@@ -56,7 +56,7 @@ export const addProductToCart = async (cartId, productId, quantity) => {
 };
 
 export const getCartContents = async (cartId) => {
-  return await db
+  const products = await db
     .query(
       `SELECT products.id, 
           products.name, 
@@ -70,6 +70,8 @@ export const getCartContents = async (cartId) => {
       [cartId]
     )
     .then((response) => response.rows);
+
+  return { cartId, products: products ? products : [] };
 };
 
 const deleteProduct = async (cartId, productId) => {

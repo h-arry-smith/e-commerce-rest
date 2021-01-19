@@ -73,9 +73,10 @@ describe('Cart Database Logic', () => {
 
     const cartContents = await getCartContents(carts[0].id);
 
-    cartContents.should.be.a.instanceOf(Array);
-    cartContents.length.should.equal(1);
-    cartContents[0].should.deep.equal({ ...product, quantity: 22 });
+    cartContents.products.length.should.equal(1);
+    cartContents.products.should.have.deep.members([
+      { ...product, quantity: 22 },
+    ]);
   });
   it('remove product from cart if update is zero or less', async () => {
     await addProduct(product);
@@ -87,10 +88,8 @@ describe('Cart Database Logic', () => {
     const cartContentsOne = await getCartContents(carts[0].id);
     const cartContentsTwo = await getCartContents(carts[1].id);
 
-    cartContentsOne.should.be.a.instanceOf(Array);
-    cartContentsTwo.should.be.a.instanceOf(Array);
-    cartContentsOne.length.should.equal(0);
-    cartContentsTwo.length.should.equal(0);
+    cartContentsOne.products.length.should.equal(0);
+    cartContentsTwo.products.length.should.equal(0);
   });
   it('multiple cart adds sum totals', async () => {
     await addProduct(product);
@@ -99,9 +98,12 @@ describe('Cart Database Logic', () => {
 
     const cartContents = await getCartContents(carts[0].id);
 
-    cartContents.should.be.a.instanceOf(Array);
-    cartContents.length.should.equal(1);
-    cartContents[0].should.deep.equal({ ...product, quantity: 40 });
+    cartContents.should.be.a.instanceOf(Object);
+    cartContents.products.should.be.a.instanceOf(Array);
+    cartContents.products.length.should.equal(1);
+    cartContents.products.should.have.deep.members([
+      { ...product, quantity: 40 },
+    ]);
   });
   it('gets the contents of a cart by id', async () => {
     await addProduct(product);
@@ -109,9 +111,12 @@ describe('Cart Database Logic', () => {
 
     const cartContents = await getCartContents(carts[0].id);
 
-    cartContents.should.be.a.instanceOf(Array);
-    cartContents.length.should.equal(1);
-    cartContents[0].should.deep.equal({ ...product, quantity: 99 });
+    cartContents.should.be.a.instanceOf(Object);
+    cartContents.products.should.be.a.instanceOf(Object);
+    cartContents.products.length.should.equal(1);
+    cartContents.products.should.have.deep.members([
+      { ...product, quantity: 99 },
+    ]);
   });
   it('removes a product completely from the cart', async () => {
     await addProduct(product);
@@ -121,8 +126,9 @@ describe('Cart Database Logic', () => {
 
     const cartContents = await getCartContents(carts[0].id);
 
-    cartContents.should.be.a.instanceOf(Array);
-    cartContents.length.should.equal(0);
+    cartContents.should.be.a.instanceOf(Object);
+    cartContents.products.should.be.a.instanceOf(Array);
+    cartContents.products.length.should.equal(0);
   });
   it('get a specific quantity of a product from a cart', async () => {
     await addProduct(product);
@@ -140,7 +146,8 @@ describe('Cart Database Logic', () => {
 
     const cartContents = await getCartContents(carts[2].id);
 
-    cartContents.should.be.a.instanceOf(Array);
-    cartContents[0].should.deep.equal({ ...product, quantity: 5 });
+    cartContents.should.be.a.instanceOf(Object);
+    cartContents.products.should.be.a.instanceOf(Array);
+    cartContents.products.should.deep.equal([{ ...product, quantity: 5 }]);
   });
 });
