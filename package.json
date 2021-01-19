@@ -5,8 +5,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "PGUSER=test PGPASSWORD=null PGDATABASE=ecommerce PGHOST=localhost PGPORT=5432 LOGGING=true nodemon index.js",
-    "test": "PGUSER=test PGPASSWORD=null PGDATABASE=ecommerce_test PGHOST=localhost PGPORT=5432 mocha tests/*"
+    "dev": "PGUSER=test PGPASSWORD=null PGDATABASE=ecommerce PGHOST=localhost PGPORT=5432 LOGGING=true NODE_ENV=dev nodemon index.js",
+    "test": "PGUSER=test PGPASSWORD=null PGDATABASE=ecommerce_test PGHOST=localhost PGPORT=5432 NODE_ENV=test mocha tests/*"
   },
   "author": "",
   "license": "ISC",
