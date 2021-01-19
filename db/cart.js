@@ -1,5 +1,6 @@
 import { response } from 'express';
 import { nanoid } from 'nanoid';
+import cartsRouter from '../routes/carts.js';
 import productRouter from '../routes/products.js';
 import db from './db.js';
 
@@ -22,6 +23,10 @@ export const getAll = async () => {
 };
 
 export const updateCart = async (cartId, productId, quantity) => {
+  if (quantity <= 0) {
+    return deleteProduct(cartId, productId);
+  }
+
   await db.query(
     'UPDATE carts_products SET quantity = $1 WHERE cart_id = $2 AND products_id = $3',
     [quantity, cartId, productId]

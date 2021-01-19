@@ -77,6 +77,21 @@ describe('Cart Database Logic', () => {
     cartContents.length.should.equal(1);
     cartContents[0].should.deep.equal({ ...product, quantity: 22 });
   });
+  it('remove product from cart if update is zero or less', async () => {
+    await addProduct(product);
+    await addProductToCart(carts[0].id, product.id, 13);
+    await addProductToCart(carts[1].id, product.id, 8);
+    await updateCart(carts[0].id, product.id, 0);
+    await updateCart(carts[1].id, product.id, -1);
+
+    const cartContentsOne = await getCartContents(carts[0].id);
+    const cartContentsTwo = await getCartContents(carts[1].id);
+
+    cartContentsOne.should.be.a.instanceOf(Array);
+    cartContentsTwo.should.be.a.instanceOf(Array);
+    cartContentsOne.length.should.equal(0);
+    cartContentsTwo.length.should.equal(0);
+  });
   it('multiple cart adds sum totals', async () => {
     await addProduct(product);
     await addProductToCart(carts[0].id, product.id, 13);

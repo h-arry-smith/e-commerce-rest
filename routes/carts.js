@@ -4,6 +4,7 @@ import {
   addProductToCart,
   createCart,
   removeProductFromCart,
+  updateCart,
 } from '../db/cart.js';
 
 const cartsRouter = Router();
@@ -53,6 +54,19 @@ cartsRouter.post('/remove', async (req, res) => {
   }
 
   res.status(204).send();
+});
+
+cartsRouter.post('/update', async (req, res) => {
+  if (req.body.length === undefined) {
+    const { cartId, productId, quantity } = req.body;
+    await updateCart(cartId, productId, quantity);
+  } else {
+    for (let product of req.body) {
+      await updateCart(product.cartId, product.productId, product.quantity);
+    }
+  }
+
+  res.status(200).send();
 });
 
 export default cartsRouter;

@@ -293,4 +293,99 @@ describe('Carts API', async () => {
       ]);
     });
   });
+  describe('POST /carts/update', async () => {
+    it('change the amount of an existing product', async () => {
+      const cartId = await createCart(user.id);
+      const products = [
+        { ...product, name: 'test1', id: nanoid() },
+        { ...product, name: 'test2', id: nanoid() },
+        { ...product, name: 'test3', id: nanoid() },
+      ];
+
+      await addProduct(products[0]);
+      await addProduct(products[1]);
+      await addProduct(products[2]);
+      await addProductToCart(cartId, products[0].id, 4);
+      await addProductToCart(cartId, products[1].id, 5);
+      await addProductToCart(cartId, products[2].id, 6);
+
+      const { status } = await api
+        .post('/api/carts/update')
+        .send({ cartId, productId: products[0].id, quantity: 12 });
+
+      status.should.equal(200);
+
+      const contents = await getCartContents(cartId);
+
+      contents.should.be.a.instanceOf(Array);
+      contents.length.should.equal(3);
+      contents.should.deep.equal([
+        { ...products[0], quantity: 12 },
+        { ...products[1], quantity: 5 },
+        { ...products[2], quantity: 6 },
+      ]);
+    });
+    it('update a product to zero or less and it is removed', async () => {
+      const cartId = await createCart(user.id);
+      const products = [
+        { ...product, name: 'test1', id: nanoid() },
+        { ...product, name: 'test2', id: nanoid() },
+        { ...product, name: 'test3', id: nanoid() },
+      ];
+
+      await addProduct(products[0]);
+      await addProduct(products[1]);
+      await addProduct(products[2]);
+      await addProductToCart(cartId, products[0].id, 4);
+      await addProductToCart(cartId, products[1].id, 5);
+      await addProductToCart(cartId, products[2].id, 6);
+
+      const updateOne = await api
+        .post('/api/carts/update')
+        .send({ cartId, productId: products[0].id, quantity: 0 });
+      const updateTwo = await api
+        .post('/api/carts/update')
+        .send({ cartId, productId: products[1].id, quantity: -8 });
+
+      updateOne.status.should.equal(200);
+      updateTwo.status.should.equal(200);
+
+      const contents = await getCartContents(cartId);
+
+      contents.should.be.a.instanceOf(Array);
+      contents.length.should.equal(1);
+      contents.should.deep.equal([{ ...products[2], quantity: 6 }]);
+    });
+    it('update products correctly with a list of products', async () => {
+      const cartId = await createCart(user.id);
+      const products = [
+        { ...product, name: 'test1', id: nanoid() },
+        { ...product, name: 'test2', id: nanoid() },
+        { ...product, name: 'test3', id: nanoid() },
+      ];
+
+      await addProduct(products[0]);
+      await addProduct(products[1]);
+      await addProduct(products[2]);
+      await addProductToCart(cartId, products[0].id, 4);
+      await addProductToCart(cartId, products[1].id, 5);
+      await addProductToCart(cartId, products[2].id, 6);
+
+      const { status } = await api.post('/api/carts/update').send([
+        { cartId, productId: products[0].id, quantity: 0 },
+        { cartId, productId: products[1].id, quantity: 88 },
+      ]);
+
+      status.should.equal(200);
+
+      const contents = await getCartContents(cartId);
+
+      contents.should.be.a.instanceOf(Array);
+      contents.length.should.equal(2);
+      contents.should.have.deep.members([
+        { ...products[1], quantity: 88 },
+        { ...products[2], quantity: 6 },
+      ]);
+    });
+  });
 });
