@@ -5,7 +5,7 @@ import { nanoid } from 'nanoid';
 import createServer from '../app.js';
 
 import { seedData } from './helpers/user.js';
-import { removeSeedData } from './helpers/cart.js';
+import { removeSeedData, seedCartProducts } from './helpers/cart.js';
 import { add as addProduct } from '../db/product.js';
 import {
   findById,
@@ -14,7 +14,6 @@ import {
   getCartContents,
   addProductToCart,
 } from '../db/cart.js';
-import { add } from '../db/product.js';
 
 const app = createServer();
 const api = request(app);
@@ -34,6 +33,12 @@ const product = {
   price: '$100.00',
   category: 1,
 };
+
+const products = [
+  { ...product, name: 'test1', id: nanoid(), quantity: 4 },
+  { ...product, name: 'test2', id: nanoid(), quantity: 5 },
+  { ...product, name: 'test3', id: nanoid(), quantity: 6 },
+];
 
 describe('Carts API', async () => {
   beforeEach(async () => {
@@ -103,12 +108,6 @@ describe('Carts API', async () => {
     });
     it('can add multiple products in one request', async () => {
       const cartId = await createCart(user.id);
-      const products = [
-        { ...product, name: 'test1', id: nanoid() },
-        { ...product, name: 'test2', id: nanoid() },
-        { ...product, name: 'test3', id: nanoid() },
-      ];
-
       await addProduct(products[0]);
       await addProduct(products[1]);
       await addProduct(products[2]);
@@ -141,18 +140,7 @@ describe('Carts API', async () => {
   describe('POST /carts/remove', async () => {
     it('removes all of a single product from the cart', async () => {
       const cartId = await createCart(user.id);
-      const products = [
-        { ...product, name: 'test1', id: nanoid() },
-        { ...product, name: 'test2', id: nanoid() },
-        { ...product, name: 'test3', id: nanoid() },
-      ];
-
-      await addProduct(products[0]);
-      await addProduct(products[1]);
-      await addProduct(products[2]);
-      await addProductToCart(cartId, products[0].id, 4);
-      await addProductToCart(cartId, products[1].id, 5);
-      await addProductToCart(cartId, products[2].id, 6);
+      await seedCartProducts(products, cartId);
 
       const { status } = await api
         .post('/api/carts/remove')
@@ -164,25 +152,14 @@ describe('Carts API', async () => {
 
       contents.should.be.a.instanceOf(Array);
       contents.length.should.equal(2);
-      contents.should.deep.equal([
+      contents.should.have.deep.members([
         { ...products[0], quantity: 4 },
         { ...products[2], quantity: 6 },
       ]);
     });
     it('removes some of a product from a cart', async () => {
       const cartId = await createCart(user.id);
-      const products = [
-        { ...product, name: 'test1', id: nanoid() },
-        { ...product, name: 'test2', id: nanoid() },
-        { ...product, name: 'test3', id: nanoid() },
-      ];
-
-      await addProduct(products[0]);
-      await addProduct(products[1]);
-      await addProduct(products[2]);
-      await addProductToCart(cartId, products[0].id, 4);
-      await addProductToCart(cartId, products[1].id, 5);
-      await addProductToCart(cartId, products[2].id, 6);
+      await seedCartProducts(products, cartId);
 
       const { status } = await api
         .post('/api/carts/remove')
@@ -202,18 +179,7 @@ describe('Carts API', async () => {
     });
     it('removes a product completely if the quantity is zero or below', async () => {
       const cartId = await createCart(user.id);
-      const products = [
-        { ...product, name: 'test1', id: nanoid() },
-        { ...product, name: 'test2', id: nanoid() },
-        { ...product, name: 'test3', id: nanoid() },
-      ];
-
-      await addProduct(products[0]);
-      await addProduct(products[1]);
-      await addProduct(products[2]);
-      await addProductToCart(cartId, products[0].id, 4);
-      await addProductToCart(cartId, products[1].id, 5);
-      await addProductToCart(cartId, products[2].id, 6);
+      await seedCartProducts(products, cartId);
 
       const removeOne = await api
         .post('/api/carts/remove')
@@ -233,18 +199,7 @@ describe('Carts API', async () => {
     });
     it('removes mutiple products at once', async () => {
       const cartId = await createCart(user.id);
-      const products = [
-        { ...product, name: 'test1', id: nanoid() },
-        { ...product, name: 'test2', id: nanoid() },
-        { ...product, name: 'test3', id: nanoid() },
-      ];
-
-      await addProduct(products[0]);
-      await addProduct(products[1]);
-      await addProduct(products[2]);
-      await addProductToCart(cartId, products[0].id, 4);
-      await addProductToCart(cartId, products[1].id, 5);
-      await addProductToCart(cartId, products[2].id, 6);
+      await seedCartProducts(products, cartId);
 
       const { status } = await api.post('/api/carts/remove').send([
         { cartId, productId: products[0].id },
@@ -261,18 +216,7 @@ describe('Carts API', async () => {
     });
     it('removes mutiple products at once with differing quantities', async () => {
       const cartId = await createCart(user.id);
-      const products = [
-        { ...product, name: 'test1', id: nanoid() },
-        { ...product, name: 'test2', id: nanoid() },
-        { ...product, name: 'test3', id: nanoid() },
-      ];
-
-      await addProduct(products[0]);
-      await addProduct(products[1]);
-      await addProduct(products[2]);
-      await addProductToCart(cartId, products[0].id, 4);
-      await addProductToCart(cartId, products[1].id, 5);
-      await addProductToCart(cartId, products[2].id, 6);
+      await seedCartProducts(products, cartId);
 
       const { status } = await api.post('/api/carts/remove').send([
         { cartId, productId: products[0].id, quantity: 3 },
@@ -296,18 +240,7 @@ describe('Carts API', async () => {
   describe('POST /carts/update', async () => {
     it('change the amount of an existing product', async () => {
       const cartId = await createCart(user.id);
-      const products = [
-        { ...product, name: 'test1', id: nanoid() },
-        { ...product, name: 'test2', id: nanoid() },
-        { ...product, name: 'test3', id: nanoid() },
-      ];
-
-      await addProduct(products[0]);
-      await addProduct(products[1]);
-      await addProduct(products[2]);
-      await addProductToCart(cartId, products[0].id, 4);
-      await addProductToCart(cartId, products[1].id, 5);
-      await addProductToCart(cartId, products[2].id, 6);
+      await seedCartProducts(products, cartId);
 
       const { status } = await api
         .post('/api/carts/update')
@@ -319,7 +252,7 @@ describe('Carts API', async () => {
 
       contents.should.be.a.instanceOf(Array);
       contents.length.should.equal(3);
-      contents.should.deep.equal([
+      contents.should.have.deep.members([
         { ...products[0], quantity: 12 },
         { ...products[1], quantity: 5 },
         { ...products[2], quantity: 6 },
@@ -327,18 +260,7 @@ describe('Carts API', async () => {
     });
     it('update a product to zero or less and it is removed', async () => {
       const cartId = await createCart(user.id);
-      const products = [
-        { ...product, name: 'test1', id: nanoid() },
-        { ...product, name: 'test2', id: nanoid() },
-        { ...product, name: 'test3', id: nanoid() },
-      ];
-
-      await addProduct(products[0]);
-      await addProduct(products[1]);
-      await addProduct(products[2]);
-      await addProductToCart(cartId, products[0].id, 4);
-      await addProductToCart(cartId, products[1].id, 5);
-      await addProductToCart(cartId, products[2].id, 6);
+      await seedCartProducts(products, cartId);
 
       const updateOne = await api
         .post('/api/carts/update')
@@ -358,18 +280,7 @@ describe('Carts API', async () => {
     });
     it('update products correctly with a list of products', async () => {
       const cartId = await createCart(user.id);
-      const products = [
-        { ...product, name: 'test1', id: nanoid() },
-        { ...product, name: 'test2', id: nanoid() },
-        { ...product, name: 'test3', id: nanoid() },
-      ];
-
-      await addProduct(products[0]);
-      await addProduct(products[1]);
-      await addProduct(products[2]);
-      await addProductToCart(cartId, products[0].id, 4);
-      await addProductToCart(cartId, products[1].id, 5);
-      await addProductToCart(cartId, products[2].id, 6);
+      await seedCartProducts(products, cartId);
 
       const { status } = await api.post('/api/carts/update').send([
         { cartId, productId: products[0].id, quantity: 0 },
