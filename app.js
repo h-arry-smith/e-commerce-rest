@@ -4,6 +4,7 @@ import cartsRouter from './routes/carts.js';
 
 import productRouter from './routes/products.js';
 import userRouter from './routes/users.js';
+import orderRouter from './routes/orders.js';
 
 const createServer = () => {
   const app = express();
@@ -16,6 +17,7 @@ const createServer = () => {
   api.use('/products', productRouter);
   api.use('/users', userRouter);
   api.use('/carts', cartsRouter);
+  api.use('/orders', orderRouter);
 
   app.use(express.json());
   app.use('/api', api);
