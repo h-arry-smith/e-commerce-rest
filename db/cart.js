@@ -66,3 +66,36 @@ export const getCartContents = async (cartId) => {
     )
     .then((response) => response.rows);
 };
+
+const deleteProduct = async (cartId, productId) => {
+  return await db.query(
+    `DELETE FROM carts_products WHERE cart_id = $1 AND products_id = $2`,
+    [cartId, productId]
+  );
+};
+
+export const getProductQuantityFromCart = async (cartId, productId) => {
+  const response = await db
+    .query(
+      'SELECT carts_products.quantity FROM carts_products WHERE cart_id = $1 AND products_id = $2',
+      [cartId, productId]
+    )
+    .then((response) => response.rows[0]);
+
+  return response.quantity;
+};
+
+export const removeProductFromCart = async (cartId, productId, quantity) => {
+  if (!quantity) {
+    return await deleteProduct(cartId, productId);
+  }
+
+  const existingQuantity = await getProductQuantityFromCart(cartId, productId);
+  const newQuantity = existingQuantity - quantity;
+
+  if (newQuantity <= 0) {
+    return await deleteProduct(cartId, productId);
+  }
+
+  return await updateCart(cartId, productId, newQuantity);
+};

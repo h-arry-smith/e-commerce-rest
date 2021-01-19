@@ -8,6 +8,8 @@ import {
   getCartContents,
   addProductToCart,
   updateCart,
+  removeProductFromCart,
+  getProductQuantityFromCart,
 } from '../../db/cart.js';
 import { add as addUser } from '../../db/user.js';
 import { add as addProduct } from '../../db/product.js';
@@ -95,5 +97,35 @@ describe('Cart Database Logic', () => {
     cartContents.should.be.a.instanceOf(Array);
     cartContents.length.should.equal(1);
     cartContents[0].should.deep.equal({ ...product, quantity: 99 });
+  });
+  it('removes a product completely from the cart', async () => {
+    await addProduct(product);
+    await addProductToCart(carts[0].id, product.id, 22);
+
+    await removeProductFromCart(carts[0].id, product.id);
+
+    const cartContents = await getCartContents(carts[0].id);
+
+    cartContents.should.be.a.instanceOf(Array);
+    cartContents.length.should.equal(0);
+  });
+  it('get a specific quantity of a product from a cart', async () => {
+    await addProduct(product);
+    await addProductToCart(carts[1].id, product.id, 13);
+
+    const quantity = await getProductQuantityFromCart(carts[1].id, product.id);
+
+    quantity.should.equal(13);
+  });
+  it('removes a quantity amount from a product', async () => {
+    await addProduct(product);
+    await addProductToCart(carts[2].id, product.id, 11);
+
+    await removeProductFromCart(carts[2].id, product.id, 6);
+
+    const cartContents = await getCartContents(carts[2].id);
+
+    cartContents.should.be.a.instanceOf(Array);
+    cartContents[0].should.deep.equal({ ...product, quantity: 5 });
   });
 });

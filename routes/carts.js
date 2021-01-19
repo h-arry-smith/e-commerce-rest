@@ -1,6 +1,10 @@
 import Router from 'express-promise-router';
 
-import { addProductToCart, createCart } from '../db/cart.js';
+import {
+  addProductToCart,
+  createCart,
+  removeProductFromCart,
+} from '../db/cart.js';
 
 const cartsRouter = Router();
 
@@ -32,6 +36,23 @@ cartsRouter.post('/add', async (req, res) => {
   }
 
   res.status(201).send();
+});
+
+cartsRouter.post('/remove', async (req, res) => {
+  if (req.body.length === undefined) {
+    const { cartId, productId, quantity } = req.body;
+    await removeProductFromCart(cartId, productId, quantity);
+  } else {
+    for (let product of req.body) {
+      await removeProductFromCart(
+        product.cartId,
+        product.productId,
+        product.quantity
+      );
+    }
+  }
+
+  res.status(204).send();
 });
 
 export default cartsRouter;
