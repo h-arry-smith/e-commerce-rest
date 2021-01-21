@@ -6,15 +6,6 @@ import {
   getCartContents,
 } from './cart.js';
 
-const cast = (order) => {
-  return {
-    id: order.id,
-    status: order.status,
-    date: order.date,
-    addressId: order.address_id,
-  };
-};
-
 export const getOrderById = async (id) => {
   const order = await db
     .query('SELECT * FROM orders WHERE id = $1', [id])
