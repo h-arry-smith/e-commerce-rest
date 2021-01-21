@@ -340,7 +340,7 @@ describe('Carts API', async () => {
 
       body.should.be.a.instanceOf(Object);
       body.products.length.should.equal(3);
-      body.should.deep.equal({ cartId: cartId, products });
+      body.products.should.have.deep.members(products);
     });
     it('returns the the correct object for an empty cart', async () => {
       const cartId = await createCart(user.id);
