@@ -1,17 +1,60 @@
+import { response } from 'express';
 import Router from 'express-promise-router';
 import {
   createOrder,
   updateAddress,
   updateStatus,
   getAll,
+  getOrderById,
+  getUserOrders,
 } from '../db/order.js';
 
 const orderRouter = Router();
 
+orderRouter.param('orderId', async (req, res, next, id) => {
+  const orders = await getAll();
+  const index = orders.findIndex((order) => order.id === id);
+
+  if (index === -1) {
+    return res.status(404).send('order not found');
+  }
+
+  req.orderId = id;
+  next();
+});
+
+const filterOrdersByUser = async (userId, orders) => {
+  if (userId === undefined) {
+    return orders;
+  }
+
+  let userOrders = await getUserOrders(userId);
+  userOrders = userOrders.map((order) => order.order_id);
+
+  return orders.filter((order) => userOrders.includes(order.id));
+};
+
+const filterOrdersByStatus = async (status, orders) => {
+  if (status === undefined) {
+    return orders;
+  }
+  return orders.filter((order) => order.status === status);
+};
+
 orderRouter.get('/', async (req, res) => {
-  const orders = await getAll(req.query.full);
+  const { userId, status } = req.query;
+  let orders = await getAll(req.query.full);
+
+  orders = await filterOrdersByUser(userId, orders);
+  orders = await filterOrdersByStatus(status, orders);
 
   res.status(200).send(orders);
+});
+
+orderRouter.get('/:orderId', async (req, res) => {
+  const order = await getOrderById(req.orderId);
+
+  res.status(200).send(order);
 });
 
 orderRouter.post('/', async (req, res) => {
