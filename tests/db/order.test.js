@@ -10,7 +10,12 @@ import {
   getUserOrders,
   createUserOrder,
 } from '../../db/order.js';
-import { addProductToCart, createCart } from '../../db/cart.js';
+import {
+  addProductToCart,
+  createCart,
+  getAll as getAllCarts,
+  getCartContents,
+} from '../../db/cart.js';
 import { add as addProduct } from '../../db/product.js';
 
 const user = {
@@ -88,6 +93,19 @@ describe('Order Database Logic', () => {
 
     const userOrders = await getUserOrders(user.id);
     userOrders.should.have.deep.members(expected);
+  });
+  it('deletes the old cart and its contents', async () => {
+    const date = new Date();
+    const cart = await createCart(user.id);
+    await addProduct(product);
+    await addProductToCart(cart, product.id, 28);
+    await createOrder(cart, date);
+
+    const carts = await getAllCarts();
+    const contents = await getCartContents(cart);
+
+    carts.should.deep.equal([]);
+    contents.products.should.deep.equal([]);
   });
   it('get an order by its ID', async () => {
     const found = await getOrderById(order.id);

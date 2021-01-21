@@ -1,6 +1,10 @@
 import db from './db.js';
 import { findById as findByIdUser } from './user.js';
-import { findById as findByIdCart, getCartContents } from './cart.js';
+import {
+  deleteCart,
+  findById as findByIdCart,
+  getCartContents,
+} from './cart.js';
 
 const cast = (order) => {
   return {
@@ -32,6 +36,7 @@ export const createOrder = async (cartId, date) => {
 
   await createOrderLines(cartId, contents.products);
   await createUserOrder(user.id, cartId);
+  await deleteCart(cartId);
 
   const order = await getOrderById(cartId);
   return order;
