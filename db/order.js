@@ -31,6 +31,7 @@ export const createOrder = async (cartId, date) => {
   );
 
   await createOrderLines(cartId, contents.products);
+  await createUserOrder(user.id, cartId);
 
   const order = await getOrderById(cartId);
   return order;
@@ -60,5 +61,14 @@ INNER JOIN products ON orders_products.product_id = products.id
 WHERE orders_products.order_id = $1`,
       [orderId]
     )
+    .then((response) => response.rows);
+};
+
+export const createUserOrder = async (userId, orderId) => {
+  await db.query('INSERT INTO orders_users VALUES ($1, $2)', [userId, orderId]);
+};
+export const getUserOrders = async (userId) => {
+  return await db
+    .query('SELECT * FROM orders_users WHERE user_id = $1', [userId])
     .then((response) => response.rows);
 };
