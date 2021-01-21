@@ -121,4 +121,22 @@ describe('Orders API', () => {
       order.status.should.equal('ordered');
     });
   });
+  describe('GET /orders', () => {
+    it('gets all orders from the database', async () => {
+      await createOrder(cartId, new Date());
+      const { status, body } = await api.get('/api/orders');
+
+      status.should.equal(200);
+      body.length.should.equal(1);
+    });
+    it('?full=true returns orders with their products', async () => {
+      await createOrder(cartId, new Date());
+
+      const { status, body } = await api.get('/api/orders/?full=true');
+
+      status.should.equal(200);
+      body.length.should.equal(1);
+      body[0].products.should.have.deep.members(products);
+    });
+  });
 });

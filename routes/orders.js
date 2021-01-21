@@ -1,7 +1,18 @@
 import Router from 'express-promise-router';
-import { createOrder, updateAddress, updateStatus } from '../db/order.js';
+import {
+  createOrder,
+  updateAddress,
+  updateStatus,
+  getAll,
+} from '../db/order.js';
 
 const orderRouter = Router();
+
+orderRouter.get('/', async (req, res) => {
+  const orders = await getAll(req.query.full);
+
+  res.status(200).send(orders);
+});
 
 orderRouter.post('/', async (req, res) => {
   const order = await createOrder(req.body.cartId, new Date());

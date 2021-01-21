@@ -1,4 +1,5 @@
 import db from './db.js';
+import parse from 'postgres-date';
 import { findById as findByIdUser } from './user.js';
 import {
   deleteCart,
@@ -6,12 +7,31 @@ import {
   getCartContents,
 } from './cart.js';
 
+export const getAll = async (all = false) => {
+  const orders = await db
+    .query('SELECT * FROM orders')
+    .then((response) => response.rows);
+
+  if (!all) {
+    return orders;
+  }
+
+  const allOrder = [];
+  for (let order of orders) {
+    const fullOrder = await getOrderById(order.id);
+    allOrder.push(fullOrder);
+  }
+
+  return allOrder;
+};
+
 export const getOrderById = async (id) => {
   const order = await db
     .query('SELECT * FROM orders WHERE id = $1', [id])
     .then((response) => response.rows[0]);
 
-  return { ...order, products: await getOrderLines(id) };
+  const products = await getOrderLines(id);
+  return { ...order, products };
 };
 
 export const createOrder = async (cartId, date) => {
@@ -22,7 +42,7 @@ export const createOrder = async (cartId, date) => {
 
   await db.query(
     'INSERT INTO orders (id, date, address_id) VALUES ($1, $2, $3) ',
-    [cartId, date, address]
+    [cartId, date.toISOString(), address]
   );
 
   await createOrderLines(cartId, contents.products);

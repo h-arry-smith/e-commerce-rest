@@ -11,6 +11,7 @@ import {
   createUserOrder,
   updateAddress,
   updateStatus,
+  getAll,
 } from '../../db/order.js';
 
 import {
@@ -145,6 +146,43 @@ describe('Order Database Logic', () => {
 
     const order = await getOrderById(cart);
     order.status.should.equal('ordered');
+  });
+  it('get all orders', async () => {
+    const orders = await getAll();
+    const expected = [
+      {
+        id: order.id,
+        date: order.date,
+        address_id: order.address_id,
+        status: order.status,
+      },
+    ];
+
+    orders.length.should.equal(1);
+    orders.should.have.deep.members(expected);
+  });
+  it('get all orders with products', async () => {
+    const date = new Date();
+    const cart = await createCart(user.id);
+    await addProduct(product);
+    await addProductToCart(cart, product.id, 28);
+    await createOrder(cart, date);
+
+    const orders = await getAll(true);
+
+    const expected = [
+      order,
+      {
+        id: cart,
+        date: date,
+        address_id: 'testtesttesttesttestt',
+        status: 'ordered',
+        products: [{ ...product, quantity: 28 }],
+      },
+    ];
+
+    orders.length.should.equal(2);
+    orders.should.have.deep.members(expected);
   });
   it('get an order by its ID', async () => {
     const found = await getOrderById(order.id);
