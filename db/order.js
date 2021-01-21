@@ -30,7 +30,6 @@ export const createOrder = async (cartId, date) => {
     [cartId, date, address]
   );
 
-  // console.log(contents.products);
   await createOrderLines(cartId, contents.products);
 
   const order = await getOrderById(cartId);
@@ -39,7 +38,6 @@ export const createOrder = async (cartId, date) => {
 
 const createOrderLines = async (id, products) => {
   for (let product of products) {
-    console.log(product);
     await db.query('INSERT INTO orders_products VALUES ($1, $2, $3)', [
       id,
       product.id,
