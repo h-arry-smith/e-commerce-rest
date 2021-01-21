@@ -372,7 +372,7 @@ describe('Carts API', async () => {
 
       status.should.equal(200);
       body.products.length.should.equal(3);
-      body.should.deep.equal({ cartId: cartId, products });
+      body.products.should.have.deep.members(products);
     });
     it('404 if user does not exist', async () => {
       const cartId = await createCart(user.id);
