@@ -9,7 +9,7 @@ import { seedCartProducts } from './helpers/cart.js';
 import db from '../db/db.js';
 import { createCart } from '../db/cart.js';
 
-import { getOrderById } from '../db/order.js';
+import { createOrder, getOrderById } from '../db/order.js';
 
 const app = createServer();
 const api = request(app);
@@ -49,12 +49,76 @@ describe('Orders API', () => {
   });
   describe('POST /orders', () => {
     it('creates an order from a cart', async () => {
-      const { status, body } = await api.post('/api/orders').send({ cartId });
+      const { status } = await api.post('/api/orders').send({ cartId });
 
       status.should.equal(201);
       const order = await getOrderById(cartId);
 
       order.products.should.have.deep.members(products);
+    });
+  });
+  describe('PUT /orders/', () => {
+    it('update the address of an order', async () => {
+      await createOrder(cartId, new Date());
+
+      const { status } = await api
+        .put('/api/orders')
+        .send({ cartId, address_id: 'addresstoupdatetotest' });
+
+      const order = await getOrderById(cartId);
+
+      status.should.equal(200);
+      order.address_id.should.equal('addresstoupdatetotest');
+    });
+    it('cant update to an address that does not exist', async () => {
+      await createOrder(cartId, new Date());
+
+      const { status } = await api
+        .put('/api/orders')
+        .send({ cartId, address_id: 'bad-id' });
+
+      const order = await getOrderById(cartId);
+
+      status.should.equal(400);
+      order.address_id.should.equal('testtesttesttesttestt');
+    });
+    it('update the status of an order to shipped', async () => {
+      await createOrder(cartId, new Date());
+      const newStatus = 'shipped';
+
+      const { status } = await api
+        .put('/api/orders')
+        .send({ cartId, status: newStatus });
+
+      const order = await getOrderById(cartId);
+
+      status.should.equal(200);
+      order.status.should.equal(newStatus);
+    });
+    it('update the status of an order to complete', async () => {
+      await createOrder(cartId, new Date());
+      const newStatus = 'complete';
+
+      const { status } = await api
+        .put('/api/orders')
+        .send({ cartId, status: newStatus });
+
+      const order = await getOrderById(cartId);
+
+      status.should.equal(200);
+      order.status.should.equal(newStatus);
+    });
+    it('can not update status to anything that isnt a correct order status', async () => {
+      await createOrder(cartId, new Date());
+
+      const { status } = await api
+        .put('/api/orders')
+        .send({ cartId, status: 'bad-status' });
+
+      const order = await getOrderById(cartId);
+
+      status.should.equal(400);
+      order.status.should.equal('ordered');
     });
   });
 });

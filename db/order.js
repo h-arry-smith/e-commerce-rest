@@ -72,8 +72,27 @@ WHERE orders_products.order_id = $1`,
 export const createUserOrder = async (userId, orderId) => {
   await db.query('INSERT INTO orders_users VALUES ($1, $2)', [userId, orderId]);
 };
+
 export const getUserOrders = async (userId) => {
   return await db
     .query('SELECT * FROM orders_users WHERE user_id = $1', [userId])
     .then((response) => response.rows);
+};
+
+export const updateAddress = async (orderId, addressId) => {
+  return await db.query('UPDATE orders SET address_id = $1 WHERE id = $2', [
+    addressId,
+    orderId,
+  ]);
+};
+export const updateStatus = async (orderId, status) => {
+  const allowedStatus = ['ordered', 'shipped', 'complete'];
+  if (allowedStatus.includes(status) === false) {
+    throw new Error('incorrect status');
+  }
+
+  return await db.query('UPDATE orders SET status = $1 WHERE id = $2', [
+    status,
+    orderId,
+  ]);
 };

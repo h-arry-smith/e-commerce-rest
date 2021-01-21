@@ -9,7 +9,10 @@ import {
   getOrderById,
   getUserOrders,
   createUserOrder,
+  updateAddress,
+  updateStatus,
 } from '../../db/order.js';
+
 import {
   addProductToCart,
   createCart,
@@ -106,6 +109,42 @@ describe('Order Database Logic', () => {
 
     carts.should.deep.equal([]);
     contents.products.should.deep.equal([]);
+  });
+  it('update an address', async () => {
+    const date = new Date();
+    const cart = await createCart(user.id);
+    await addProduct(product);
+    await addProductToCart(cart, product.id, 28);
+    await createOrder(cart, date);
+
+    await updateAddress(cart, 'addresstoupdatetotest');
+    const order = await getOrderById(cart);
+
+    order.address_id.should.equal('addresstoupdatetotest');
+  });
+  it('update the status', async () => {
+    const date = new Date();
+    const cart = await createCart(user.id);
+    await addProduct(product);
+    await addProductToCart(cart, product.id, 28);
+    await createOrder(cart, date);
+
+    await updateStatus(cart, 'shipped');
+    const order = await getOrderById(cart);
+
+    order.status.should.equal('shipped');
+  });
+  it('status must be in allowed statuses', async () => {
+    const date = new Date();
+    const cart = await createCart(user.id);
+    await addProduct(product);
+    await addProductToCart(cart, product.id, 28);
+    await createOrder(cart, date);
+
+    updateStatus(cart, 'bad-status');
+
+    const order = await getOrderById(cart);
+    order.status.should.equal('ordered');
   });
   it('get an order by its ID', async () => {
     const found = await getOrderById(order.id);
