@@ -5,7 +5,8 @@ import { nanoid } from 'nanoid';
 import createServer from '../app.js';
 
 import { seedData } from './helpers/user.js';
-import { removeSeedData, seedCartProducts } from './helpers/cart.js';
+import { seedCartProducts } from './helpers/cart.js';
+import db from '../db/db.js';
 import { createCart } from '../db/cart.js';
 
 import { getOrderById } from '../db/order.js';
@@ -44,7 +45,7 @@ describe('Orders API', () => {
     await seedCartProducts(products, cartId);
   });
   afterEach(async () => {
-    await removeSeedData();
+    await db.flush();
   });
   describe('POST /orders', () => {
     it('creates an order from a cart', async () => {
@@ -53,7 +54,7 @@ describe('Orders API', () => {
       status.should.equal(201);
       const order = await getOrderById(cartId);
 
-      order.should.deep.equal({ ...body, date: new Date(body.date) });
+      order.products.should.have.deep.members(products);
     });
   });
 });
